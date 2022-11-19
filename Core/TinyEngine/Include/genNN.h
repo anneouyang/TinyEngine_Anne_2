@@ -16,8 +16,9 @@
 
 signed char* getInput();
 signed char* getOutput();
+float* getOutput_fp();
 void setupBuffer();
-void invoke();
+void invoke(float* labels);
 void getResult(uint8_t *P, uint8_t *NP);
 int* getKbuffer();
 void end2endinference();

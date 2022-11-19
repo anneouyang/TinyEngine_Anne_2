@@ -346,6 +346,25 @@ __STATIC_FORCEINLINE q31_t arm_nn_read_q7x4(const q7_t *in_q7)
   return (val);
 }
 
+/**
+  @ Our own implementation
+  @brief         Read 4 different q7 weights from input.
+  @param[in]     filter_0, filter_1, filter_2, filter_3
+  @return        q31 value
+ */
+__STATIC_FORCEINLINE q31_t arm_nn_read_q7x4_4weights(const q7_t *filter_0, const q7_t *filter_1, const q7_t *filter_2, const q7_t *filter_3)
+{
+  //q31_t val = (((q31_t)*filter_0) << 24) | (((q31_t)*filter_1) << 16) | (((q31_t)*filter_2) << 8) | ((q31_t)*filter_3);
+  //q31_t val = (((q31_t)*filter_0) << 24) + (((q31_t)*filter_1) << 16) + (((q31_t)*filter_2) << 8) + ((q31_t)*filter_3);
+  //q31_t val = (((q31_t)*filter_1) << 24) + (((q31_t)*filter_0) << 16) + (((q31_t)*filter_3) << 8) + ((q31_t)*filter_2);
+  
+  //q31_t val = (((q31_t)*filter_3) << 24) | (((q31_t)*filter_2) << 16) | (((q31_t)*filter_1) << 8) | ((q31_t)*filter_0);
+  q31_t val = (((q31_t)*filter_3) << 24) + (((q31_t)*filter_2) << 16) + (((q31_t)*filter_1) << 8) + ((q31_t)*filter_0);
+  //q31_t val = (((q31_t)*filter_2) << 24) + (((q31_t)*filter_3) << 16) + (((q31_t)*filter_0) << 8) + ((q31_t)*filter_1);
+
+  return (val);
+}
+
 
 #if defined (ARM_MATH_DSP)
 
@@ -386,6 +405,27 @@ __STATIC_FORCEINLINE const q7_t *read_and_pad_reordered(const q7_t *source, q31_
 #endif
 
         return source;
+}
+
+
+/**
+ * @ Our own implementation: Read and pad 4 weights from input
+ */
+
+__STATIC_FORCEINLINE const q7_t *read_and_pad_4weights_reordered(const q7_t *filter_0, const q7_t *filter_1, const q7_t *filter_2, const q7_t *filter_3, 
+                                                                 q31_t* out1, q31_t* out2)
+{
+        q31_t     inA = arm_nn_read_q7x4_4weights(filter_0, filter_1, filter_2, filter_3);
+
+#ifndef ARM_MATH_BIG_ENDIAN
+        *out2 = __SXTB16(__ROR(inA, 8));
+        *out1 = __SXTB16(inA);
+#else
+        *out1 = __SXTB16(__ROR(inA, 8));
+        *out2 = __SXTB16(inA);
+#endif
+
+        return filter_0;
 }
 
 
@@ -549,7 +589,6 @@ __STATIC_FORCEINLINE q31_t arm_nn_divide_by_power_of_two(const q31_t dividend, c
 
     return result;
 }
-
 /**
  * @brief           Requantize a given value.
  * @param[in]       val         Value to be requantized
@@ -562,14 +601,8 @@ __STATIC_FORCEINLINE q31_t arm_nn_divide_by_power_of_two(const q31_t dividend, c
 //#define no_reQ
 __STATIC_FORCEINLINE q31_t arm_nn_requantize(const q31_t val, const q31_t multiplier, const q31_t shift)
 {
-#ifdef no_reQ
-//	return val;
-  return arm_nn_divide_by_power_of_two(arm_nn_sat_doubling_high_mult(val * (1 << LEFT_SHIFT(shift)), multiplier),
-          RIGHT_SHIFT(shift));
-#else
   return arm_nn_divide_by_power_of_two(arm_nn_sat_doubling_high_mult(val * (1 << LEFT_SHIFT(shift)), multiplier),
                                        RIGHT_SHIFT(shift));
-#endif
 }
 
 #if defined(ARM_MATH_MVEI)

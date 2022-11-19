@@ -1,155 +1,525 @@
-/* ----------------------------------------------------------------------
- * Project: TinyEngine
- * Target ISA:  ARMv7E-M
- * Reference papers:
- * 	- MCUNet: Tiny Deep Learning on IoT Device, NIPS 2020
- *	- MCUNetV2: Memory-Efficient Patch-based Inference for Tiny Deep Learning, NIPS 2021
- * Contact author:
- * 	- Ji Lin, jilin@mit.ed
- * 	- Wei-Ming Chen, wmchen@mit.edu
- * 	- Song Han, songhan@mit.edu
- * -------------------------------------------------------------------- */
+/* Automatically generated source file */
+#include <float.h>
+#include "arm_nnfunctions.h"
+
 #include "genNN.h"
 #include "genModel.h"
 
-#include "genNN.h"
 #include "tinyengine_function.h"
+#include "tinyengine_function_fp.h"
+
+#define ONLY_TRANSPOSED_CONV 1
+
 
 /* Variables used by all ops */
 ADD_params add_params;
+Conv_Params conv_params;
+Depthwise_Params dpconv_params;
+int i;
+int8_t *int8ptr,*int8ptr2;
+int32_t *int32ptr;
+float *fptr,*fptr2,*fptr3;
+
+float lr = 0.1;
+float blr = 0.1;
 
 signed char* getInput() {
-	return buffer0;
+	return &buffer0[65536];
 }
 signed char* getOutput() {
+#if ONLY_TRANSPOSED_CONV
 	return &buffer0[0];
+#else
+	return NNoutput;
+#endif
 }
-void invoke(){
+void end2endinference(q7_t* img){
+    invoke(NULL);
+}
+void invoke(float* labels){
+#if ONLY_TRANSPOSED_CONV
+/* layer 83:TRANSPOSE_CONV_2D */
+pointwise_conv_4row4col_IOHW_int8input_int8w_partialCH(&buffer0[65536],4,4,576,(q7_t*)v14_conv_0_weight,(q7_t*)v14_conv_0_weightFlash,24,NULL, &buffer0[0],4,4,96,-FLT_MAX,FLT_MAX, sbuf, &buffer0[1536], 1);
+
+#else
 /* layer 0:CONV_2D */
-convolve_s8_kernel3_inputch3_stride2_pad1(&buffer0[0],80,80,3,(const q7_t*) weight0,bias0,shift0,multiplier0,-128,1,-128,127,&buffer0[64000],40,40,16,sbuf,kbuf,-1);
+convolve_s8_kernel3_inputch3_stride2_pad1_fpreq(&buffer0[65536],128,128,3,(const q7_t*) weight0,bias0,scales0,-128,0,-128,127,&buffer0[0],64,64,16,sbuf,kbuf,0);
 /* layer 1:DEPTHWISE_CONV_2D */
-depthwise_kernel3x3_stride1_inplace_CHW(&buffer0[64000],40,40,16,(const q7_t*) CHWweight1,offsetBias1,offsetRBias1,shift1,multiplier1,-128,128,-128,127,&buffer0[0],40,40,16,sbuf,-128);
+depthwise_kernel3x3_stride1_inplace_CHW_fpreq(&buffer0[0],64,64,16,(const q7_t*) CHWweight1,offsetBias1,offsetRBias1,scales1,-128,128,-128,127,&buffer0[0],64,64,16,sbuf,-128);
 /* layer 2:CONV_2D */
-convolve_1x1_s8_ch16(&buffer0[64000],40,40,16,(const q7_t*) weight2,bias2,shift2,multiplier2,-2,128,-128,127,&buffer0[0],40,40,8,sbuf);
+convolve_1x1_s8_ch16_fpreq(&buffer0[0],64,64,16,(const q7_t*) weight2,bias2,scales2,-6,128,-128,127,&buffer0[147456],64,64,8,sbuf);
 /* layer 3:CONV_2D */
-convolve_1x1_s8_ch8(&buffer0[0],40,40,8,(const q7_t*) weight3,bias3,shift3,multiplier3,-128,2,-128,127,&buffer0[12800],40,40,48,sbuf);
+convolve_1x1_s8_ch8_fpreq(&buffer0[147456],64,64,8,(const q7_t*) weight3,bias3,scales3,-128,6,-128,127,&buffer0[16384],64,64,32,sbuf);
 /* layer 4:DEPTHWISE_CONV_2D */
-depthwise_kernel3x3_stride2_inplace_CHW(&buffer0[12800],40,40,48,(const q7_t*) CHWweight4,offsetBias4,offsetRBias4,shift4,multiplier4,-128,128,-128,127,&buffer0[0],20,20,48,sbuf,-128);
+depthwise_kernel3x3_stride2_inplace_CHW_fpreq(&buffer0[16384],64,64,32,(const q7_t*) CHWweight4,offsetBias4,offsetRBias4,scales4,-128,128,-128,127,&buffer0[16384],32,32,32,sbuf,-128);
 /* layer 5:CONV_2D */
-convolve_1x1_s8_ch48(&buffer0[12800],20,20,48,(const q7_t*) weight5,bias5,shift5,multiplier5,-19,128,-128,127,&buffer1[0],20,20,16,sbuf);
+convolve_1x1_s8_fpreq(&buffer0[16384],32,32,32,(const q7_t*) weight5,bias5,scales5,0,128,-128,127,&buffer0[0],32,32,16,sbuf);
 /* layer 6:CONV_2D */
-convolve_1x1_s8_ch16(&buffer1[0],20,20,16,(const q7_t*) weight6,bias6,shift6,multiplier6,-128,19,-128,127,&buffer0[70400],20,20,48,sbuf);
+convolve_1x1_s8_ch16_fpreq(&buffer0[0],32,32,16,(const q7_t*) weight6,bias6,scales6,-128,0,-128,127,&buffer0[16384],32,32,48,sbuf);
 /* layer 7:DEPTHWISE_CONV_2D */
-depthwise_kernel3x3_stride1_inplace_CHW(&buffer0[70400],20,20,48,(const q7_t*) CHWweight7,offsetBias7,offsetRBias7,shift7,multiplier7,-128,128,-128,127,&buffer0[0],20,20,48,sbuf,-128);
+depthwise_kernel3x3_stride1_inplace_CHW_fpreq(&buffer0[16384],32,32,48,(const q7_t*) CHWweight7,offsetBias7,offsetRBias7,scales7,-128,128,-128,127,&buffer0[16384],32,32,48,sbuf,-128);
 /* layer 8:CONV_2D */
-convolve_1x1_s8_ch48(&buffer0[70400],20,20,48,(const q7_t*) weight8,bias8,shift8,multiplier8,12,128,-128,127,&buffer0[0],20,20,16,sbuf);
+convolve_1x1_s8_ch48_fpreq(&buffer0[16384],32,32,48,(const q7_t*) weight8,bias8,scales8,14,128,-128,127,&buffer0[65536],32,32,16,sbuf);
 /* layer 9:ADD */
-add_params.input_h = 20;add_params.input_w = 20;add_params.input_c = 16;
-add_params.left_shift = 20;add_params.input1_offset = -12;add_params.input1_multiplier = 1853017153;add_params.input1_shift = -1;add_params.input2_offset = 19;add_params.input2_multiplier = 1073741824;add_params.input2_shift = 0;add_params.output_offset = -22;add_params.output_multiplier = 1738872347;add_params.output_shift = -19;add_params.quantized_activation_max = 127;add_params.quantized_activation_min = -128;
-add(add_params.input_c * add_params.input_h * add_params.input_w, &add_params, &buffer0[0], &buffer1[0], &buffer1[0]);
+add_fpreq(16384, &buffer0[0],0.057521824,0,&buffer0[65536],0.10736182,14,0.10652236,12,&buffer0[81920]);
 /* layer 10:CONV_2D */
-convolve_1x1_s8_ch16(&buffer1[0],20,20,16,(const q7_t*) weight9,bias9,shift9,multiplier9,-128,22,-128,127,&buffer0[70400],20,20,48,sbuf);
+convolve_1x1_s8_ch16_fpreq(&buffer0[81920],32,32,16,(const q7_t*) weight9,bias9,scales9,-128,-12,-128,127,&buffer0[6144],32,32,48,sbuf);
 /* layer 11:DEPTHWISE_CONV_2D */
-depthwise_kernel3x3_stride1_inplace_CHW(&buffer0[70400],20,20,48,(const q7_t*) CHWweight10,offsetBias10,offsetRBias10,shift10,multiplier10,-128,128,-128,127,&buffer0[0],20,20,48,sbuf,-128);
+depthwise_kernel7x7_stride2_inplace_CHW_fpreq(&buffer0[6144],32,32,48,(const q7_t*) CHWweight10,offsetBias10,offsetRBias10,scales10,-128,128,-128,127,&buffer0[6144],16,16,48,sbuf,-128);
 /* layer 12:CONV_2D */
-convolve_1x1_s8_ch48(&buffer0[70400],20,20,48,(const q7_t*) weight11,bias11,shift11,multiplier11,-10,128,-128,127,&buffer0[0],20,20,16,sbuf);
-/* layer 13:ADD */
-add_params.input_h = 20;add_params.input_w = 20;add_params.input_c = 16;
-add_params.left_shift = 20;add_params.input1_offset = 10;add_params.input1_multiplier = 1983546124;add_params.input1_shift = -3;add_params.input2_offset = 22;add_params.input2_multiplier = 1073741824;add_params.input2_shift = 0;add_params.output_offset = -14;add_params.output_multiplier = 2104562937;add_params.output_shift = -19;add_params.quantized_activation_max = 127;add_params.quantized_activation_min = -128;
-add(add_params.input_c * add_params.input_h * add_params.input_w, &add_params, &buffer0[0], &buffer1[0], &buffer0[83200]);
-/* layer 14:CONV_2D */
-convolve_1x1_s8_ch16(&buffer0[83200],20,20,16,(const q7_t*) weight12,bias12,shift12,multiplier12,-128,14,-128,127,&buffer0[0],20,20,48,sbuf);
-/* layer 15:DEPTHWISE_CONV_2D */
-depthwise_kernel7x7_stride2_inplace_CHW(&buffer0[0],20,20,48,(const q7_t*) CHWweight13,offsetBias13,offsetRBias13,shift13,multiplier13,-128,128,-128,127,&buffer0[84800],10,10,48,sbuf,-128);
-/* layer 16:CONV_2D */
-convolve_1x1_s8_ch48(&buffer0[0],10,10,48,(const q7_t*) weight14,bias14,shift14,multiplier14,2,128,-128,127,&buffer1[0],10,10,24,sbuf);
+convolve_1x1_s8_ch48_fpreq(&buffer0[6144],16,16,48,(const q7_t*) weight11,bias11,scales11,-5,128,-128,127,&buffer0[0],16,16,24,sbuf);
+/* layer 13:CONV_2D */
+convolve_1x1_s8_ch24_fpreq(&buffer0[0],16,16,24,(const q7_t*) weight12,bias12,scales12,-128,5,-128,127,&buffer0[6144],16,16,120,sbuf);
+/* layer 14:DEPTHWISE_CONV_2D */
+depthwise_kernel3x3_stride1_inplace_CHW_fpreq(&buffer0[6144],16,16,120,(const q7_t*) CHWweight13,offsetBias13,offsetRBias13,scales13,-128,128,-128,127,&buffer0[6144],16,16,120,sbuf,-128);
+/* layer 15:CONV_2D */
+convolve_1x1_s8_fpreq(&buffer0[6144],16,16,120,(const q7_t*) weight14,bias14,scales14,-34,128,-128,127,&buffer0[36864],16,16,24,sbuf);
+/* layer 16:ADD */
+add_fpreq(6144, &buffer0[0],0.04381648,-5,&buffer0[36864],0.05460287,-34,0.06156369,-11,&buffer0[43008]);
 /* layer 17:CONV_2D */
-convolve_1x1_s8_ch24(&buffer1[0],10,10,24,(const q7_t*) weight15,bias15,shift15,multiplier15,-128,-2,-128,127,&buffer0[75200],10,10,144,sbuf);
+convolve_1x1_s8_ch24_fpreq(&buffer0[43008],16,16,24,(const q7_t*) weight15,bias15,scales15,-128,11,-128,127,&buffer0[8000],16,16,120,sbuf);
 /* layer 18:DEPTHWISE_CONV_2D */
-depthwise_kernel3x3_stride1_inplace_CHW(&buffer0[75200],10,10,144,(const q7_t*) CHWweight16,offsetBias16,offsetRBias16,shift16,multiplier16,-128,128,-128,127,&buffer0[0],10,10,144,sbuf,-128);
+depthwise_kernel3x3_stride2_inplace_CHW_fpreq(&buffer0[8000],16,16,120,(const q7_t*) CHWweight16,offsetBias16,offsetRBias16,scales16,-128,128,-128,127,&buffer0[8000],8,8,120,sbuf,-128);
 /* layer 19:CONV_2D */
-convolve_1x1_s8(&buffer0[75200],10,10,144,(const q7_t*) weight17,bias17,shift17,multiplier17,2,128,-128,127,&buffer0[0],10,10,24,sbuf);
-/* layer 20:ADD */
-add_params.input_h = 10;add_params.input_w = 10;add_params.input_c = 24;
-add_params.left_shift = 20;add_params.input1_offset = -2;add_params.input1_multiplier = 1073741824;add_params.input1_shift = 0;add_params.input2_offset = -2;add_params.input2_multiplier = 2067874274;add_params.input2_shift = -1;add_params.output_offset = 12;add_params.output_multiplier = 1844006744;add_params.output_shift = -19;add_params.quantized_activation_max = 127;add_params.quantized_activation_min = -128;
-add(add_params.input_c * add_params.input_h * add_params.input_w, &add_params, &buffer0[0], &buffer1[0], &buffer1[0]);
-/* layer 21:CONV_2D */
-convolve_1x1_s8_ch24(&buffer1[0],10,10,24,(const q7_t*) weight18,bias18,shift18,multiplier18,-128,-12,-128,127,&buffer0[77600],10,10,120,sbuf);
-/* layer 22:DEPTHWISE_CONV_2D */
-depthwise_kernel5x5_stride1_inplace_CHW(&buffer0[77600],10,10,120,(const q7_t*) CHWweight19,offsetBias19,offsetRBias19,shift19,multiplier19,-128,128,-128,127,&buffer0[0],10,10,120,sbuf,-128);
-/* layer 23:CONV_2D */
-convolve_1x1_s8(&buffer0[77600],10,10,120,(const q7_t*) weight20,bias20,shift20,multiplier20,0,128,-128,127,&buffer0[0],10,10,24,sbuf);
-/* layer 24:ADD */
-add_params.input_h = 10;add_params.input_w = 10;add_params.input_c = 24;
-add_params.left_shift = 20;add_params.input1_offset = 0;add_params.input1_multiplier = 2142432871;add_params.input1_shift = -3;add_params.input2_offset = -12;add_params.input2_multiplier = 1073741824;add_params.input2_shift = 0;add_params.output_offset = 18;add_params.output_multiplier = 1986712119;add_params.output_shift = -19;add_params.quantized_activation_max = 127;add_params.quantized_activation_min = -128;
-add(add_params.input_c * add_params.input_h * add_params.input_w, &add_params, &buffer0[0], &buffer1[0], &buffer0[87200]);
-/* layer 25:CONV_2D */
-convolve_1x1_s8_ch24(&buffer0[87200],10,10,24,(const q7_t*) weight21,bias21,shift21,multiplier21,-128,-18,-128,127,&buffer0[0],10,10,144,sbuf);
-/* layer 26:DEPTHWISE_CONV_2D */
-depthwise_kernel7x7_stride2_inplace_CHW(&buffer0[0],10,10,144,(const q7_t*) CHWweight22,offsetBias22,offsetRBias22,shift22,multiplier22,-128,128,-128,127,&buffer0[86000],5,5,144,sbuf,-128);
+convolve_1x1_s8_fpreq(&buffer0[8000],8,8,120,(const q7_t*) weight17,bias17,scales17,0,128,-128,127,&buffer0[5440],8,8,40,sbuf);
+/* layer 20:CONV_2D */
+convolve_1x1_s8_fpreq(&buffer0[5440],8,8,40,(const q7_t*) weight18,bias18,scales18,-128,0,-128,127,&buffer0[8000],8,8,160,sbuf);
+/* layer 21:DEPTHWISE_CONV_2D */
+depthwise_kernel7x7_stride1_inplace_CHW_fpreq(&buffer0[8000],8,8,160,(const q7_t*) CHWweight19,offsetBias19,offsetRBias19,scales19,-128,128,-128,127,&buffer0[8000],8,8,160,sbuf,-128);
+/* layer 22:CONV_2D */
+convolve_1x1_s8_fpreq_bitmask(&buffer0[8000],8,8,160,(const q7_t*) weight20,bias20,scales20,22,128,-128,127,&buffer0[18240],&buffer0[2560],8,8,40,sbuf);
+/* layer 23:ADD */
+add_fpreq_bitmask(2560, &buffer0[5440],0.036471475,0,&buffer0[18240],0.031147331,22,0.0372383,3,&buffer0[0],&buffer0[2880]);
+/* layer 24:CONV_2D */
+convolve_1x1_s8_fpreq_bitmask(&buffer0[0],8,8,40,(const q7_t*) weight21,bias21,scales21,-128,-3,-128,127,&buffer0[11456],&buffer0[5440],8,8,160,sbuf);
+/* layer 25:DEPTHWISE_CONV_2D */
+depthwise_kernel5x5_stride1_inplace_CHW_fpreq_bitmask(&buffer0[11456],8,8,160,(const q7_t*) CHWweight22,offsetBias22,offsetRBias22,scales22,-128,128,-128,127,&buffer0[11456],&buffer0[6720],8,8,160,sbuf,-128);
+/* layer 26:CONV_2D */
+convolve_1x1_s8_fpreq_bitmask(&buffer0[11456],8,8,160,(const q7_t*) weight23,bias23,scales23,2,128,-128,127,&buffer0[8000],&buffer0[11072],8,8,48,sbuf);
 /* layer 27:CONV_2D */
-convolve_1x1_s8(&buffer0[0],5,5,144,(const q7_t*) weight23,bias23,shift23,multiplier23,-11,128,-128,127,&buffer1[0],5,5,40,sbuf);
-/* layer 28:CONV_2D */
-convolve_1x1_s8(&buffer1[0],5,5,40,(const q7_t*) weight24,bias24,shift24,multiplier24,-128,11,-128,127,&buffer0[83600],5,5,240,sbuf);
-/* layer 29:DEPTHWISE_CONV_2D */
-depthwise_kernel7x7_stride1_inplace_CHW(&buffer0[83600],5,5,240,(const q7_t*) CHWweight25,offsetBias25,offsetRBias25,shift25,multiplier25,-128,128,-128,127,&buffer0[0],5,5,240,sbuf,-128);
-/* layer 30:CONV_2D */
-convolve_1x1_s8(&buffer0[83600],5,5,240,(const q7_t*) weight26,bias26,shift26,multiplier26,7,128,-128,127,&buffer0[0],5,5,40,sbuf);
-/* layer 31:ADD */
-add_params.input_h = 5;add_params.input_w = 5;add_params.input_c = 40;
-add_params.left_shift = 20;add_params.input1_offset = -7;add_params.input1_multiplier = 1626712137;add_params.input1_shift = -1;add_params.input2_offset = 11;add_params.input2_multiplier = 1073741824;add_params.input2_shift = 0;add_params.output_offset = -3;add_params.output_multiplier = 1074737776;add_params.output_shift = -18;add_params.quantized_activation_max = 127;add_params.quantized_activation_min = -128;
-add(add_params.input_c * add_params.input_h * add_params.input_w, &add_params, &buffer0[0], &buffer1[0], &buffer0[88600]);
-/* layer 32:CONV_2D */
-convolve_1x1_s8(&buffer0[88600],5,5,40,(const q7_t*) weight27,bias27,shift27,multiplier27,-128,3,-128,127,&buffer0[0],5,5,240,sbuf);
-/* layer 33:DEPTHWISE_CONV_2D */
-depthwise_kernel3x3_stride1_inplace_CHW(&buffer0[0],5,5,240,(const q7_t*) CHWweight28,offsetBias28,offsetRBias28,shift28,multiplier28,-128,128,-128,127,&buffer0[83600],5,5,240,sbuf,-128);
-/* layer 34:CONV_2D */
-convolve_1x1_s8(&buffer0[0],5,5,240,(const q7_t*) weight29,bias29,shift29,multiplier29,-5,128,-128,127,&buffer1[0],5,5,48,sbuf);
+convolve_1x1_s8_fpreq_bitmask(&buffer0[8000],8,8,48,(const q7_t*) weight24,bias24,scales24,-128,-2,-128,127,&buffer0[17216],&buffer0[11456],8,8,144,sbuf);
+/* layer 28:DEPTHWISE_CONV_2D */
+depthwise_kernel3x3_stride1_inplace_CHW_fpreq_bitmask(&buffer0[17216],8,8,144,(const q7_t*) CHWweight25,offsetBias25,offsetRBias25,scales25,-128,128,-128,127,&buffer0[17216],&buffer0[12608],8,8,144,sbuf,-128);
+/* layer 29:CONV_2D */
+convolve_1x1_s8_fpreq_bitmask(&buffer0[17216],8,8,144,(const q7_t*) weight26,bias26,scales26,17,128,-128,127,&buffer0[26432],&buffer0[16832],8,8,48,sbuf);
+/* layer 30:ADD */
+add_fpreq_bitmask(3072, &buffer0[8000],0.034391046,2,&buffer0[26432],0.027072277,17,0.039104667,6,&buffer0[13760],&buffer0[17216]);
+/* layer 31:CONV_2D */
+convolve_1x1_s8_fpreq_bitmask(&buffer0[13760],8,8,48,(const q7_t*) weight27,bias27,scales27,-128,-6,-128,127,&buffer0[26816],&buffer0[20288],8,8,192,sbuf);
+/* layer 32:DEPTHWISE_CONV_2D */
+depthwise_kernel3x3_stride1_inplace_CHW_fpreq_bitmask(&buffer0[26816],8,8,192,(const q7_t*) CHWweight28,offsetBias28,offsetRBias28,scales28,-128,128,-128,127,&buffer0[26816],&buffer0[21824],8,8,192,sbuf,-128);
+/* layer 33:CONV_2D */
+convolve_1x1_s8_fpreq_bitmask(&buffer0[26816],8,8,192,(const q7_t*) weight29,bias29,scales29,-8,128,-128,127,&buffer0[39104],&buffer0[26432],8,8,48,sbuf);
+/* layer 34:ADD */
+add_fpreq_bitmask(3072, &buffer0[13760],0.039104667,6,&buffer0[39104],0.038176756,-8,0.05495224,0,&buffer0[23360],&buffer0[26816]);
 /* layer 35:CONV_2D */
-convolve_1x1_s8_ch48(&buffer1[0],5,5,48,(const q7_t*) weight30,bias30,shift30,multiplier30,-128,5,-128,127,&buffer0[84800],5,5,192,sbuf);
+convolve_1x1_s8_fpreq_bitmask(&buffer0[23360],8,8,48,(const q7_t*) weight30,bias30,scales30,-128,0,-128,127,&buffer0[38816],&buffer0[29888],8,8,240,sbuf);
 /* layer 36:DEPTHWISE_CONV_2D */
-depthwise_kernel3x3_stride1_inplace_CHW(&buffer0[84800],5,5,192,(const q7_t*) CHWweight31,offsetBias31,offsetRBias31,shift31,multiplier31,-128,128,-128,127,&buffer0[0],5,5,192,sbuf,-128);
+depthwise_kernel7x7_stride2_inplace_CHW_fpreq_bitmask(&buffer0[38816],8,8,240,(const q7_t*) CHWweight31,offsetBias31,offsetRBias31,scales31,-128,128,-128,127,&buffer0[38816],&buffer0[31808],4,4,240,sbuf,-128);
 /* layer 37:CONV_2D */
-convolve_1x1_s8(&buffer0[84800],5,5,192,(const q7_t*) weight32,bias32,shift32,multiplier32,-10,128,-128,127,&buffer0[0],5,5,48,sbuf);
-/* layer 38:ADD */
-add_params.input_h = 5;add_params.input_w = 5;add_params.input_c = 48;
-add_params.left_shift = 20;add_params.input1_offset = 10;add_params.input1_multiplier = 1073741824;add_params.input1_shift = 0;add_params.input2_offset = 5;add_params.input2_multiplier = 1728811214;add_params.input2_shift = -1;add_params.output_offset = -2;add_params.output_multiplier = 1092740395;add_params.output_shift = -18;add_params.quantized_activation_max = 127;add_params.quantized_activation_min = -128;
-add(add_params.input_c * add_params.input_h * add_params.input_w, &add_params, &buffer0[0], &buffer1[0], &buffer0[88400]);
-/* layer 39:CONV_2D */
-convolve_1x1_s8_ch48(&buffer0[88400],5,5,48,(const q7_t*) weight33,bias33,shift33,multiplier33,-128,2,-128,127,&buffer0[0],5,5,240,sbuf);
-/* layer 40:DEPTHWISE_CONV_2D */
-depthwise_kernel5x5_stride2_inplace_CHW(&buffer0[0],5,5,240,(const q7_t*) CHWweight34,offsetBias34,offsetRBias34,shift34,multiplier34,-128,128,-128,127,&buffer0[87440],3,3,240,sbuf,-128);
-/* layer 41:CONV_2D */
-convolve_1x1_s8(&buffer0[0],3,3,240,(const q7_t*) weight35,bias35,shift35,multiplier35,-8,128,-128,127,&buffer1[0],3,3,96,sbuf);
+convolve_1x1_s8_fpreq_bitmask(&buffer0[38816],4,4,240,(const q7_t*) weight32,bias32,scales32,-1,128,-128,127,&buffer0[37280],&buffer0[32288],4,4,96,sbuf);
+/* layer 38:CONV_2D */
+convolve_1x1_s8_fpreq_bitmask(&buffer0[37280],4,4,96,(const q7_t*) weight33,bias33,scales33,-128,1,-128,127,&buffer0[38816],&buffer0[32480],4,4,384,sbuf);
+/* layer 39:DEPTHWISE_CONV_2D */
+depthwise_kernel5x5_stride1_inplace_CHW_fpreq_bitmask(&buffer0[38816],4,4,384,(const q7_t*) CHWweight34,offsetBias34,offsetRBias34,scales34,-128,128,-128,127,&buffer0[38816],&buffer0[33248],4,4,384,sbuf,-128);
+/* layer 40:CONV_2D */
+convolve_1x1_s8_fpreq_bitmask(&buffer0[38816],4,4,384,(const q7_t*) weight35,bias35,scales35,-16,128,-128,127,&buffer0[44960],&buffer0[34016],4,4,96,sbuf);
+/* layer 41:ADD */
+add_fpreq_bitmask(1536, &buffer0[37280],0.027058998,-1,&buffer0[44960],0.022201976,-16,0.031616762,-1,&buffer0[35744],&buffer0[34208]);
 /* layer 42:CONV_2D */
-convolve_1x1_s8(&buffer1[0],3,3,96,(const q7_t*) weight36,bias36,shift36,multiplier36,-128,8,-128,127,&buffer0[85280],3,3,480,sbuf);
+convolve_1x1_s8_fpreq_bitmask_partialCH(&buffer0[35744],4,4,96,(const q7_t*)weight36,(const q7_t*)weight36Flash,12,bias36,scales36,-128,1,-128,127,&buffer0[39008],&buffer0[37280],4,4,384,sbuf);
 /* layer 43:DEPTHWISE_CONV_2D */
-depthwise_kernel3x3_stride1_inplace_CHW(&buffer0[85280],3,3,480,(const q7_t*) CHWweight37,offsetBias37,offsetRBias37,shift37,multiplier37,-128,128,-128,127,&buffer0[0],3,3,480,sbuf,-128);
+depthwise_kernel5x5_stride1_inplace_CHW_fpreq_bitmask(&buffer0[39008],4,4,384,(const q7_t*) CHWweight37,offsetBias37,offsetRBias37,scales37,-128,128,-128,127,&buffer0[39008],&buffer0[38048],4,4,384,sbuf,-128);
 /* layer 44:CONV_2D */
-convolve_1x1_s8(&buffer0[85280],3,3,480,(const q7_t*) weight38,bias38,shift38,multiplier38,14,128,-128,127,&buffer0[0],3,3,96,sbuf);
+convolve_1x1_s8_fpreq_bitmask(&buffer0[39008],4,4,384,(const q7_t*) weight38,bias38,scales38,-1,128,-128,127,&buffer0[45152],&buffer0[38816],4,4,96,sbuf);
 /* layer 45:ADD */
-add_params.input_h = 3;add_params.input_w = 3;add_params.input_c = 96;
-add_params.left_shift = 20;add_params.input1_offset = -14;add_params.input1_multiplier = 1931955708;add_params.input1_shift = -1;add_params.input2_offset = 8;add_params.input2_multiplier = 1073741824;add_params.input2_shift = 0;add_params.output_offset = 9;add_params.output_multiplier = 2125452290;add_params.output_shift = -19;add_params.quantized_activation_max = 127;add_params.quantized_activation_min = -128;
-add(add_params.input_c * add_params.input_h * add_params.input_w, &add_params, &buffer0[0], &buffer1[0], &buffer1[0]);
+add_fpreq_bitmask(1536, &buffer0[35744],0.031616762,-1,&buffer0[45152],0.032814495,-1,0.04403092,4,&buffer0[40544],&buffer0[39008]);
 /* layer 46:CONV_2D */
-convolve_1x1_s8(&buffer1[0],3,3,96,(const q7_t*) weight39,bias39,shift39,multiplier39,-128,-9,-128,127,&buffer0[86144],3,3,384,sbuf);
+convolve_1x1_s8_fpreq_bitmask_partialCH(&buffer0[40544],4,4,96,(const q7_t*)weight39,(const q7_t*)weight39Flash,24,bias39,scales39,-128,-4,-128,127,&buffer0[44864],&buffer0[42080],4,4,576,sbuf);
 /* layer 47:DEPTHWISE_CONV_2D */
-depthwise_kernel3x3_stride1_inplace_CHW(&buffer0[86144],3,3,384,(const q7_t*) CHWweight40,offsetBias40,offsetRBias40,shift40,multiplier40,-128,128,-128,127,&buffer0[0],3,3,384,sbuf,-128);
+depthwise_kernel3x3_stride1_inplace_CHW_fpreq_bitmask(&buffer0[44864],4,4,576,(const q7_t*) CHWweight40,offsetBias40,offsetRBias40,scales40,-128,128,-128,127,&buffer0[44864],&buffer0[43232],4,4,576,sbuf,-128);
 /* layer 48:CONV_2D */
-convolve_1x1_s8(&buffer0[86144],3,3,384,(const q7_t*) weight41,bias41,shift41,multiplier41,1,128,-128,127,&buffer0[0],3,3,96,sbuf);
-/* layer 49:ADD */
-add_params.input_h = 3;add_params.input_w = 3;add_params.input_c = 96;
-add_params.left_shift = 20;add_params.input1_offset = -1;add_params.input1_multiplier = 1890466689;add_params.input1_shift = -2;add_params.input2_offset = -9;add_params.input2_multiplier = 1073741824;add_params.input2_shift = 0;add_params.output_offset = 7;add_params.output_multiplier = 1887616697;add_params.output_shift = -19;add_params.quantized_activation_max = 127;add_params.quantized_activation_min = -128;
-add(add_params.input_c * add_params.input_h * add_params.input_w, &add_params, &buffer0[0], &buffer1[0], &buffer0[88736]);
+convolve_1x1_s8_fpreq_bitmask(&buffer0[44864],4,4,576,(const q7_t*) weight41,bias41,scales41,-1,128,-128,127,&buffer0[54080],&buffer0[44544],4,4,160,sbuf);
+/* layer 49:AVERAGE_POOL_2D */
+avg_pooling(&buffer0[54080],4,4,160,4,4,1,1,-128,127,&buffer0[44384]);
 /* layer 50:CONV_2D */
-convolve_1x1_s8(&buffer0[88736],3,3,96,(const q7_t*) weight42,bias42,shift42,multiplier42,-128,-7,-128,127,&buffer0[0],3,3,288,sbuf);
-/* layer 51:DEPTHWISE_CONV_2D */
-depthwise_kernel7x7_stride1_inplace_CHW(&buffer0[0],3,3,288,(const q7_t*) CHWweight43,offsetBias43,offsetRBias43,shift43,multiplier43,-128,128,-128,127,&buffer0[87008],3,3,288,sbuf,-128);
-/* layer 52:CONV_2D */
-convolve_1x1_s8(&buffer0[0],3,3,288,(const q7_t*) weight44,bias44,shift44,multiplier44,6,128,-128,127,&buffer0[88160],3,3,160,sbuf);
-/* layer 53:AVERAGE_POOL_2D */
-/* layer 53:AVERAGE_POOL_2D */
-avg_pooling(&buffer0[88160], 3, 3, 160, 3, 3, 1, 1, -128, 127, &buffer0[0]);
-///* layer 54:CONV_2D */
-//convolve_1x1_s8(&buffer0[0],1,1,160,(const q7_t*) weight45,bias45,shift45,multiplier45,0,-6,-128,127,&buffer0[89598],1,1,2,sbuf);
+convolve_1x1_s8_fpreq_bitmask(&buffer0[44384],1,1,160,(const q7_t*) weight42,bias42,scales42,-34,1,-128,127,&buffer0[44864],&buffer0[44904],1,1,10,sbuf);
+/* layer 51:CAST */
+fptr = (float*)&buffer0[44908];
+int8ptr = (int8_t*)&buffer0[44864];
+for(int i = 0; i < 10; i++) fptr[i] = (float)int8ptr[i];
+/* layer 52:LOG_SOFTMAX */
+LogSoftmax((float*)&buffer0[44908],1,1,10,(float*)&buffer0[44864],1,1,10);
+/* layer 53:NLL_LOSS */
+nll_loss((float*)&buffer0[44864],2,1,labels,10,(float*)&buffer0[44908]);
+/* layer 54:ONES */
+fptr = (float*)&buffer0[44908];for(int i = 0; i < 1; i++) fptr[i] = 1.0;
+/* layer 55:NEGATIVE */
+fptr = (float*)&buffer0[44908];fptr2 = (float*)&buffer0[44948];for(int i = 0; i < 1; i++) fptr2[i] = fptr[i] * -1.0f;
+/* layer 56:MUL */
+fptr = (float*)labels;fptr3 = (float*)&buffer0[44908];fptr2 = &buffer0[44948];for(int i = 0; i < 10; i++) fptr3[i] = *fptr2 * fptr[i];
+/* layer 57:SUM */
+sum_3D((float*)&buffer0[44908],1,10,1,1,(float*)&buffer0[44948]);
+/* layer 58:EXP */
+tte_exp(10,(float*)&buffer0[44864],(float*)&buffer0[44952]);
+/* layer 59:MUL */
+fptr = (float*)&buffer0[44952];fptr3 = (float*)&buffer0[44992];fptr2 = &buffer0[44948];for(int i = 0; i < 10; i++) fptr3[i] = *fptr2 * fptr[i];
+/* layer 60:SUBTRACT */
+sub(10,(float*)&buffer0[44908],(float*)&buffer0[44992],(float*)&buffer0[44864]);
+/* layer 61:WHERE */
+where_zeros_inplace_bit((bool*)&buffer0[44904],10,(float*)&buffer0[44864]);
+/* layer 62:CAST */
+int8ptr = (int8_t*)&buffer0[44904];
+fptr = (float*)&buffer0[44864];
+for(int i = 0; i < 10; i++) int8ptr[i] = (int8_t)fptr[i];
+/* layer 63:BIAS_UPDATE */
+const float v15_bias_QAS[10] = {7226669.0,5630245.0,7711640.5,8892241.0,8484369.0,5921074.5,6742354.0,8089809.0,6873818.5,5485806.5,};
+fptr = (float*)&buffer0[44904];//gradients
+for(int i = 0; i < 10; i++) v15_bias[i] -= (int32_t)(fptr[i] * blr * v15_bias_QAS[i]);
+/* layer 64:TRANSPOSE_CONV_2D */
+pointwise_conv_fp_1row10col_10inputdepth_IOHW_int8w((float*)&buffer0[44864],1,1,10,(q7_t*)v15_weight,NULL,(float*)&buffer0[45544],1,1,160,-FLT_MAX,FLT_MAX,(float*)sbuf, 1);
+/* layer 65:MUL */
+fptr = (float*)&buffer0[45544];fptr3 = (float*)&buffer0[44904];for(int i = 0; i < 160; i++) fptr3[i] = 0.0625 * fptr[i];
+/* layer 66:ONES */
+fptr = (float*)&buffer0[63840];for(int i = 0; i < 2560; i++) fptr[i] = 1.0;
+/* layer 67:MUL */
+fptr = &buffer0[63840];
+fptr3 = (float*)&buffer0[53600];fptr2 = &buffer0[44904];
+for(int hw = 0; hw < 16; hw++){
+for(int i = 0; i < 160; i++) *fptr3++ = fptr2[i] * *fptr++;
+}
+/* layer 68:WHERE */
+where_zeros_inplace_bit((bool*)&buffer0[44544],2560,(float*)&buffer0[53600]);
+/* layer 69:CAST */
+int8ptr = (int8_t*)&buffer0[63840];
+fptr = (float*)&buffer0[53600];
+for(int i = 0; i < 2560; i++) int8ptr[i] = (int8_t)fptr[i];
+/* layer 70:SUM */
+sum_4D_exclude_int8((signed char*)&buffer0[63840],1,4,4,160,3,(int32_t*)&buffer0[44904]);
+/* layer 71:BIAS_UPDATE */
+const float v14_conv_2_bias_QAS[160] = {13692137.0,19261938.0,11724018.0,15995767.0,11511035.0,13978226.0,13318236.0,15185337.0,16044907.0,13090192.0,18656104.0,15929412.0,13392275.0,12705674.0,14612814.0,14853912.0,13506463.0,14990395.0,11315240.0,14900121.0,12532963.0,13305904.0,10984116.0,11420090.0,20989936.0,11729253.0,16511564.0,12546760.0,15382199.0,11444539.0,14609242.0,14229125.0,10841364.0,13249268.0,11710322.0,18311496.0,18176314.0,16571779.0,10241948.0,17752202.0,10010849.0,14704289.0,16407807.0,10964493.0,9445204.0,11574554.0,13028653.0,10459334.0,13996892.0,13706602.0,11706172.0,9088910.0,17713242.0,13367667.0,16977514.0,13729297.0,12711183.0,12772596.0,13657839.0,17160660.0,12789136.0,12517683.0,15142629.0,10657967.0,15758544.0,12207528.0,13358369.0,15665969.0,12541531.0,11594505.0,14079964.0,12522974.0,14928081.0,10138978.0,13967913.0,15935079.0,12038422.0,11431681.0,12112233.0,16464442.0,14495634.0,9923740.0,12361548.0,16376936.0,13596515.0,10047472.0,11238909.0,11956242.0,16708229.0,16412659.0,17055102.0,12363023.0,11499603.0,16893202.0,11182502.0,12018862.0,10686181.0,9444339.0,13663267.0,11849798.0,14407176.0,16582653.0,14108628.0,18280370.0,9444990.0,17465492.0,12230222.0,14927575.0,15896605.0,15578875.0,11972533.0,9797134.0,10548356.0,13393242.0,12720091.0,11875466.0,11710234.0,19880172.0,11598175.0,10539637.0,15175966.0,12422034.0,14625480.0,9663037.0,12314371.0,17176266.0,16664494.0,17591406.0,13589260.0,16484145.0,9586017.0,17904128.0,9004582.0,12500575.0,15361911.0,15686215.0,11069421.0,16926154.0,11444003.0,19838518.0,19701492.0,13418607.0,13593890.0,17349308.0,11338150.0,7302307.5,17400080.0,16249119.0,9367620.0,14919256.0,11277772.0,12360135.0,13006402.0,23275230.0,13262085.0,13616705.0,9458116.0,10899180.0,13300777.0,11491153.0,};
+int32ptr = (int32_t*)&buffer0[44904];//gradients
+for(int i = 0; i < 160; i++) v14_conv_2_bias[i] -= (int32_t)(int32ptr[i] * blr * v14_conv_2_bias_QAS[i]);
+/* layer 72:CAST */
+fptr = (float*)&buffer0[44904];
+int8ptr = (int8_t*)&buffer0[44384];
+for(int i = 0; i < 160; i++) fptr[i] = (float)int8ptr[i];
+/* layer 73:GROUP_CONV */
+const float v15_weight_QAS[10] = {156465.22,121900.914,166965.39,192526.67,183695.81,128197.68,145979.3,175153.14,148825.64,118773.67,};
+group_pointwise_conv_fp_in1x1_out1x1_1row10col_uniweight_inplace((float*)&buffer0[44904],1,1,160,weight_fp44,NULL,v15_weight,1,1,1600,-FLT_MAX,FLT_MAX,(float*)sbuf,1,160, v15_weight_QAS, lr);
+/* layer 74:TRANSPOSE_CONV_2D */
+pointwise_conv_fp_4row4col_IOHW_int8output_int8w((float*)&buffer0[53600],4,4,160,(q7_t*)v14_conv_2_weight,NULL,(float*)&buffer0[44384],4,4,576,-FLT_MAX,FLT_MAX,(float*)sbuf, &buffer0[63840], 1);
+/* layer 75:WHERE */
+where_zeros_int8_inplace_bit((bool*)&buffer0[43232],9216,(signed char*)&buffer0[44384]);
+/* layer 76:SUM */
+sum_4D_exclude_int8((signed char*)&buffer0[44384],1,4,4,576,3,(int32_t*)&buffer0[53600]);
+/* layer 77:BIAS_UPDATE */
+const float v14_conv_1_bias_QAS[576] = {654677250.0,56907796.0,28639336.0,35434564.0,41620364.0,670483260.0,99952424.0,46708484.0,65207204.0,77129590.0,86876216.0,26197844.0,51814240.0,37802844.0,56369708.0,80488216.0,496990340.0,103415900.0,52359292.0,117645930.0,36162868.0,66714136.0,41964964.0,70289260.0,141463520.0,35091620.0,292941020.0,319235940.0,149274560.0,31588280.0,58581532.0,30769990.0,94868030.0,1084318700.0,120959870.0,55601030.0,26995596.0,58911108.0,58494684.0,73105710.0,52481680.0,95490550.0,549109250.0,78954710.0,35137028.0,59012830.0,289998900.0,29434386.0,51404452.0,81299550.0,49754300.0,21620110.0,32478784.0,131605530.0,107687110.0,59945176.0,63924004.0,54849904.0,63493092.0,45972916.0,70220950.0,103747230.0,47871584.0,62248656.0,275410370.0,24195816.0,26073014.0,254556940.0,80991980.0,96683720.0,42729896.0,213654620.0,80830030.0,322784220.0,553329100.0,46875692.0,422841380.0,63145850.0,47938756.0,72988320.0,58928640.0,50203988.0,44146424.0,120659020.0,69507544.0,13374964.0,240567940.0,18266646.0,54699344.0,57096424.0,552308540.0,84762350.0,242749870.0,319167500.0,71150340.0,31884426.0,66255364.0,85494536.0,66699116.0,36679252.0,44997460.0,180317470.0,87871224.0,41108684.0,531991520.0,34514850.0,96381270.0,69300616.0,57619676.0,43981004.0,289805760.0,19124140.0,107008740.0,344962750.0,72299440.0,580689100.0,209671490.0,33476972.0,61112460.0,50215950.0,68393176.0,52556184.0,124962520.0,44188224.0,54853452.0,48236770.0,58527270.0,71695250.0,174800380.0,73951940.0,20854050.0,23348352.0,78900630.0,15238067.0,68789464.0,96828620.0,279096060.0,100488270.0,67073372.0,58398588.0,132698136.0,62893096.0,586947800.0,128614300.0,382380770.0,52745670.0,27297846.0,295490000.0,171373980.0,166499040.0,228337550.0,111371580.0,67201010.0,46145636.0,71408990.0,45095148.0,19798874.0,76104970.0,47009500.0,108986410.0,71923400.0,391806720.0,50333988.0,101243990.0,70909430.0,31091898.0,57822284.0,351701800.0,64377884.0,108605920.0,132598290.0,65642250.0,29381194.0,26002788.0,560494500.0,222602530.0,73611160.0,64367284.0,102444700.0,105854720.0,91623460.0,584034200.0,40446036.0,88276990.0,589991400.0,80158650.0,66977012.0,127081304.0,50682140.0,97636456.0,174896960.0,37453344.0,16513916.0,52115344.0,54673972.0,284836600.0,69556504.0,114206056.0,104500710.0,43250244.0,52804620.0,46978070.0,43776224.0,76813900.0,77624424.0,498489570.0,58108268.0,65040160.0,234663680.0,47201516.0,52909956.0,58724840.0,333171140.0,47209908.0,70600750.0,441201400.0,61439932.0,93082650.0,220306510.0,234074530.0,56594264.0,702751700.0,125412504.0,248965900.0,232523090.0,17991080.0,346721060.0,63789436.0,503435740.0,241199520.0,80868664.0,209974930.0,47489420.0,68403180.0,73742520.0,86631710.0,54824900.0,292945340.0,74857430.0,25703130.0,84739330.0,39290590.0,303463550.0,45986228.0,81848770.0,53310760.0,54298540.0,30542152.0,106303380.0,87395580.0,287210020.0,49321840.0,39647710.0,18478792.0,59350676.0,35629800.0,484234340.0,48085950.0,16154992.0,404483400.0,615795100.0,78496264.0,73261360.0,61674108.0,26099064.0,699598200.0,38941500.0,64231510.0,60505180.0,64973576.0,70256390.0,70861230.0,51139610.0,32120648.0,62785516.0,43137724.0,51929396.0,368455740.0,201290560.0,82584390.0,81244980.0,62516724.0,74438950.0,64338556.0,80612080.0,54837100.0,15520916.0,39409464.0,80629010.0,114839130.0,34846412.0,201007310.0,65928788.0,42773108.0,131007010.0,170778990.0,65153372.0,74664136.0,88584860.0,359521200.0,237987870.0,794981400.0,43835344.0,48056710.0,54212630.0,224232620.0,142729860.0,45310160.0,60274170.0,61516890.0,100241690.0,214157500.0,174766220.0,18965498.0,976528500.0,125968050.0,48190196.0,68159544.0,90855440.0,80148870.0,25554136.0,90372420.0,44151196.0,142363860.0,99211896.0,159560720.0,61584640.0,44390890.0,62563260.0,739954200.0,250580800.0,83113890.0,215827520.0,69334890.0,39331624.0,63023030.0,49171260.0,96203420.0,15227498.0,46266300.0,103972744.0,63911150.0,58022224.0,65204764.0,57357650.0,102470850.0,51409000.0,18943040.0,178717700.0,23863238.0,56017300.0,126508060.0,610637200.0,572862700.0,260035950.0,88401090.0,55596428.0,537952800.0,264884660.0,88599830.0,56247860.0,85039380.0,98471000.0,43227290.0,42081484.0,236852130.0,36193100.0,55489476.0,264554350.0,67817690.0,95430696.0,65984290.0,21100126.0,416677280.0,732663800.0,64633684.0,66381230.0,46598948.0,270284860.0,29732766.0,109784184.0,54277784.0,787284800.0,72548990.0,71628000.0,98449980.0,41073880.0,40253188.0,310405020.0,66526836.0,50062824.0,398259680.0,283337060.0,39688530.0,46420836.0,278220450.0,199301380.0,61640308.0,351477630.0,51733724.0,65544252.0,91552850.0,79158580.0,74639830.0,348254750.0,32287442.0,54703772.0,66396820.0,61409970.0,477720900.0,67987610.0,258890910.0,111633100.0,367385900.0,57199184.0,40422564.0,124957060.0,42436824.0,122911460.0,32194310.0,44816732.0,21652908.0,48304724.0,620104300.0,455923460.0,65915470.0,122298800.0,108369930.0,63116344.0,51079930.0,71023740.0,50536428.0,108716120.0,69045450.0,160311230.0,61704950.0,5438406.0,45865820.0,98318760.0,97947630.0,92464410.0,266429890.0,39297060.0,361692480.0,84327330.0,52093148.0,68813580.0,62595140.0,44849070.0,69300080.0,43442304.0,598566460.0,145892500.0,178124620.0,54539664.0,104331250.0,176513900.0,89473016.0,57357950.0,77571130.0,68650960.0,275267700.0,519989540.0,76950050.0,72244020.0,50186412.0,63371010.0,675403300.0,100704300.0,58621812.0,95153496.0,335437300.0,140058380.0,82091176.0,60262028.0,79512620.0,152860740.0,44524184.0,67407224.0,33087474.0,371648420.0,33859164.0,57698550.0,83707120.0,39638400.0,192536240.0,56621800.0,70704990.0,1146847200.0,151390600.0,64262056.0,46334990.0,378402530.0,413929000.0,43777404.0,106047910.0,320401200.0,40397160.0,59336308.0,59474780.0,399783870.0,41248050.0,35563644.0,533717760.0,60820964.0,121610904.0,70730456.0,35886370.0,36166430.0,743826940.0,89319450.0,200731490.0,280399680.0,130070810.0,74413980.0,42912524.0,62994880.0,131365280.0,56617220.0,132340504.0,86821544.0,57484040.0,129530720.0,35509516.0,26503264.0,97707144.0,59481024.0,187618800.0,63759810.0,341817500.0,55760372.0,340905150.0,298305280.0,29314520.0,63348276.0,206844780.0,37981620.0,104377210.0,208315120.0,65593612.0,85215460.0,66000492.0,189495310.0,112676800.0,68011340.0,283621600.0,53067724.0,83703340.0,39738884.0,102314980.0,34048096.0,56217644.0,109366650.0,71244810.0,67235336.0,68341896.0,15974653.0,66683380.0,293023680.0,67268040.0,55150110.0,28825000.0,81498376.0,59237252.0,299566400.0,80850824.0,44838536.0,45711468.0,62308544.0,84774080.0,76161624.0,33728570.0,35460708.0,48520600.0,89148140.0,54691024.0,};
+int32ptr = (int32_t*)&buffer0[53600];//gradients
+for(int i = 0; i < 576; i++) v14_conv_1_bias[i] -= (int32_t)(int32ptr[i] * blr * v14_conv_1_bias_QAS[i]);
+/* layer 78:TRANSPOSE_CONV_2D */
+transpose_depthwise_conv_kernel3_stride1_inpad1_outpad0_revised_IOHW((float*)&buffer0[44384],4,4,576,v14_conv_1_weight,NULL,(float*)&buffer0[44384],4,4,576,-FLT_MAX,FLT_MAX,(float*)sbuf, &buffer0[53600], 1, 0);
+/* layer 79:WHERE */
+where_zeros_int8_inplace_bit((bool*)&buffer0[42080],9216,(signed char*)&buffer0[44384]);
+/* layer 80:SUM */
+sum_4D_exclude_int8((signed char*)&buffer0[44384],1,4,4,576,3,(int32_t*)&buffer0[42080]);
+/* layer 81:BIAS_UPDATE */
+const float v14_conv_0_bias_QAS[576] = {709765500.0,1095124000.0,1133707000.0,815438500.0,511527780.0,1367263900.0,935322600.0,844678340.0,990682000.0,1381466900.0,1661784400.0,1016122940.0,1224061200.0,1013002750.0,428049950.0,670605060.0,589710600.0,650380160.0,557326300.0,1432191400.0,831155840.0,917173400.0,1181492500.0,880701950.0,498734750.0,560498400.0,851469200.0,2326794200.0,860911600.0,899014600.0,1542670500.0,1193208800.0,1208935700.0,1334557300.0,1723967400.0,1017743300.0,1047666560.0,803147300.0,991691650.0,1285904900.0,943131500.0,2076445000.0,568394750.0,766322900.0,1009402400.0,1752257800.0,901930900.0,1196144100.0,877986370.0,1504507600.0,1440736100.0,1676165000.0,1356689400.0,1116655700.0,796375200.0,975324400.0,900250560.0,1693932000.0,1119845900.0,1277458300.0,1268598400.0,940435260.0,1058945800.0,1202319900.0,803017150.0,1553228700.0,1649039600.0,592482560.0,1543578800.0,2043024000.0,590441800.0,583050940.0,981700800.0,1877846700.0,862232060.0,1199681000.0,587289500.0,910118660.0,1029848770.0,582502100.0,1141456000.0,830896300.0,966474200.0,1600403100.0,1206793700.0,1261174000.0,645275650.0,627599940.0,828432260.0,705586100.0,997754900.0,1288693800.0,1377384700.0,954810940.0,802859500.0,786782100.0,1292652800.0,888381100.0,791653700.0,966741100.0,1359114100.0,1421973500.0,1713822800.0,1807880400.0,755974500.0,921512960.0,1034368400.0,909598600.0,1138169200.0,875483500.0,744147100.0,547103700.0,1126018000.0,751019200.0,2665237200.0,402269400.0,1124923800.0,1253719600.0,795353200.0,800949570.0,707095200.0,1632616800.0,880725500.0,1502117000.0,1478159600.0,1059249300.0,618686000.0,1267334700.0,1343037000.0,998627700.0,1103230500.0,606646800.0,1502279000.0,1081737100.0,1499061500.0,793925950.0,1354904600.0,1395839200.0,704076700.0,778446140.0,996775040.0,842334500.0,677417000.0,1322773200.0,764164700.0,717671040.0,983127550.0,1306062000.0,1398581400.0,2267852300.0,913928640.0,765004600.0,1039427460.0,895914430.0,1201822600.0,793640200.0,485753660.0,1458245500.0,1148978400.0,1249098500.0,1240560500.0,529751800.0,810625860.0,729382600.0,1876112100.0,2655239700.0,1317100200.0,755093800.0,1626249900.0,1355298300.0,464236320.0,1248849700.0,658562750.0,988066940.0,1037217540.0,1402158800.0,891950200.0,1141235700.0,768246660.0,1105301000.0,544895100.0,1038515900.0,1569874700.0,1374045300.0,1365792100.0,707770240.0,857808960.0,1733172200.0,1274738000.0,791595900.0,1094738600.0,969909570.0,1335364000.0,889775400.0,1279947900.0,904945860.0,1355467600.0,1272010000.0,395509000.0,1186386000.0,1511950000.0,1125813000.0,1361319700.0,1315675600.0,667403800.0,1006691100.0,950591700.0,1222079100.0,882939900.0,998370300.0,879234940.0,1526667600.0,1133747100.0,1795115800.0,618088060.0,430757400.0,1056906100.0,742673700.0,820676900.0,829036160.0,1062813800.0,801857300.0,1524490900.0,1130863500.0,1553224600.0,1208842600.0,784218900.0,1458397600.0,1026584770.0,1671973600.0,1103741700.0,1380621700.0,1504777500.0,817890500.0,790377400.0,1468335600.0,1475093200.0,1956903600.0,1723930900.0,1065083900.0,577031500.0,624219200.0,691416260.0,1004647300.0,1522902800.0,697993150.0,1398376100.0,1668307600.0,1218290300.0,675446700.0,473089950.0,1260903400.0,1296227600.0,1017332350.0,1079602200.0,1728847600.0,761102600.0,904108600.0,960484350.0,1028917000.0,1110003300.0,917011600.0,946854460.0,932012200.0,781880200.0,741687500.0,1114406500.0,1167860900.0,1219633900.0,1201702300.0,671067500.0,1208231000.0,568765500.0,859809900.0,1056809400.0,1332625300.0,554227700.0,1579453000.0,720678100.0,1096826900.0,989365570.0,1522905700.0,1355347100.0,647235800.0,919510300.0,756880300.0,527748350.0,1170371300.0,891398000.0,1319128000.0,806378000.0,1085371100.0,1114828700.0,1147039900.0,1255932800.0,805798140.0,1260319900.0,2730469600.0,1523122200.0,456933700.0,1664981600.0,329745120.0,768808800.0,1698862800.0,1368207100.0,1259227900.0,1135502700.0,533421220.0,875108740.0,1315042000.0,1610768400.0,552992100.0,2074859600.0,728770100.0,704792770.0,1323453200.0,2092041300.0,478484740.0,1627354200.0,856432260.0,800860540.0,1426148700.0,936139900.0,866274940.0,836225900.0,1476864400.0,909409200.0,1340054300.0,659692300.0,497744450.0,1056237250.0,1164675500.0,1281789600.0,850571260.0,1570496100.0,770182600.0,826975700.0,771177000.0,1582711000.0,727766400.0,1845083400.0,2280922000.0,694984450.0,614463200.0,938864700.0,1484511500.0,1076206100.0,974194750.0,1146216300.0,977081800.0,1988339000.0,1142222100.0,514207940.0,1580486700.0,1007209340.0,848592900.0,908745800.0,505462500.0,1365757600.0,1429319000.0,1159292800.0,841443100.0,1222609900.0,583328000.0,1434691500.0,1124150800.0,1118268800.0,1495555500.0,496960060.0,1468733400.0,511777800.0,1266581400.0,924647400.0,848324200.0,1468851600.0,1693428200.0,302855500.0,1029968100.0,1182835000.0,1188315300.0,859590700.0,1038217000.0,460949820.0,931617600.0,1218704900.0,1332053200.0,968419650.0,961760450.0,974512450.0,956192450.0,1257385000.0,591231740.0,662804740.0,1519281400.0,802349060.0,655362240.0,770534000.0,838000450.0,785072200.0,936890000.0,1308171600.0,1099153900.0,1704177200.0,1115482200.0,866558700.0,1682019800.0,1578424300.0,2326447600.0,870230600.0,1198532700.0,973222660.0,832662340.0,345076380.0,1247841200.0,841159100.0,1356277100.0,1057226200.0,980127800.0,1835405400.0,903260200.0,1724645600.0,1053157900.0,1269480600.0,995525760.0,968609150.0,1345127200.0,922574400.0,1351952100.0,1592046100.0,1140705300.0,902511000.0,706637100.0,670551230.0,977607600.0,753510800.0,1286277600.0,1372853100.0,560120770.0,1319472400.0,372056640.0,1182992600.0,671349950.0,600612900.0,1720631800.0,1004348160.0,1812159500.0,1290155900.0,765228300.0,1290548100.0,1053504000.0,2210465800.0,571374850.0,1130181000.0,1189527800.0,2101162000.0,1014256400.0,959216500.0,672499260.0,938408960.0,1661429600.0,954882560.0,708066940.0,1170326500.0,686253060.0,1436656300.0,2456641500.0,653572540.0,902271740.0,1455706800.0,1438566700.0,1223845800.0,639383200.0,1000602100.0,968534800.0,916141300.0,720094850.0,1080491900.0,802088450.0,660013950.0,1354206000.0,1555291400.0,680623170.0,893461950.0,2420506400.0,2187462700.0,2141534300.0,1374263000.0,791174900.0,468521060.0,1192926600.0,1607688700.0,891179500.0,832951360.0,1184124500.0,1435509000.0,1180843000.0,1220177400.0,768656100.0,1036418370.0,1392252000.0,682545500.0,788558900.0,803753400.0,1047760060.0,1255842000.0,1787099300.0,1008697100.0,1280515300.0,773963260.0,1449254000.0,1279767400.0,1202323600.0,641619000.0,1070403260.0,870887500.0,1194177000.0,782379140.0,927551170.0,902481400.0,2463644200.0,1756292200.0,633898560.0,1542372500.0,1121136800.0,1055708600.0,795748900.0,1110882000.0,1305546900.0,837518500.0,725063360.0,888921860.0,1204967200.0,1227687200.0,1083948500.0,743211970.0,786811500.0,679662800.0,1071571400.0,1100937000.0,1137544700.0,1230878700.0,652873100.0,503117630.0,1067040900.0,1052204540.0,556872400.0,984733600.0,755281150.0,1200749400.0,1399731300.0,804894700.0,1933307500.0,948895400.0,692623740.0,612503300.0,709957060.0,1121045600.0,2337875500.0,627245000.0,526102820.0,850095170.0,1337719700.0,1122795000.0,613296400.0,310497730.0,1546923300.0,1554380000.0,1416566100.0,1378671700.0,1216238000.0,1961352200.0,624456700.0,639845760.0,847553000.0,670097000.0,1434944900.0,};
+int32ptr = (int32_t*)&buffer0[42080];//gradients
+for(int i = 0; i < 576; i++) v14_conv_0_bias[i] -= (int32_t)(int32ptr[i] * blr * v14_conv_0_bias_QAS[i]);
+/* layer 82:STRIDED_SLICE */
+const uint16_t begin0[] = {0, 0, 0, 0};
+const uint16_t end0[] = {1, 24, 4, 4};
+const uint16_t strides0[] = {1};
+strided_slice_4Dto4D_int8((signed char*)&buffer0[40544],1,96,4,4,begin0,end0,strides0,(signed char*)&buffer0[42080],1,24,4,4);
+/* layer 83:TRANSPOSE_CONV_2D */
+pointwise_conv_4row4col_IOHW_int8input_int8w_partialCH((float*)&buffer0[44384],4,4,576,(q7_t*)v14_conv_0_weight,(q7_t*)v14_conv_0_weightFlash,24,NULL,(float*)&buffer0[40544],4,4,96,-FLT_MAX,FLT_MAX,(float*)sbuf, &buffer0[53600], 1);
+/* layer 84:WHERE */
+where_zeros_int8_inplace_bit((bool*)&buffer0[39008],1536,(signed char*)&buffer0[40544]);
+/* layer 85:CAST */
+fptr = (float*)&buffer0[53600];
+int8ptr = (int8_t*)&buffer0[40544];
+for(int i = 0; i < 1536; i++) fptr[i] = (float)int8ptr[i];
+/* layer 86:DIV */
+fptr3 = (float*)&buffer0[59744]; fptr2 = (float*)&buffer0[53600];
+for(int i = 0; i < 1536; i++) *fptr3++ = *fptr2++ / 0.044030919671058655;
+/* layer 87:MUL */
+fptr = (float*)&buffer0[59744];fptr3 = (float*)&buffer0[65888];for(int i = 0; i < 1536; i++) fptr3[i] = 0.032814495265483856 * fptr[i];
+/* layer 88:CAST */
+int8ptr = (int8_t*)&buffer0[53600];
+fptr = (float*)&buffer0[65888];
+for(int i = 0; i < 1536; i++) int8ptr[i] = (int8_t)fptr[i];
+/* layer 89:WHERE */
+where_zeros_int8_inplace_bit((bool*)&buffer0[38816],1536,(signed char*)&buffer0[53600]);
+/* layer 90:SUM */
+sum_4D_exclude_int8((signed char*)&buffer0[53600],1,4,4,96,3,(int32_t*)&buffer0[38816]);
+/* layer 91:BIAS_UPDATE */
+const float v13_conv_2_bias_QAS[96] = {355876930.0,558494000.0,171505010.0,219625920.0,252224220.0,303974660.0,250815900.0,445427970.0,339608640.0,302080860.0,380221800.0,512144100.0,215463940.0,219955250.0,378082370.0,229628900.0,114224056.0,536883650.0,218712540.0,180932660.0,295388800.0,343863170.0,320962270.0,212863230.0,378079970.0,294832800.0,291525060.0,195432300.0,367240320.0,309562050.0,88026150.0,251921040.0,315553280.0,493595100.0,414583550.0,257529400.0,299791600.0,319802300.0,207819330.0,318879900.0,288209820.0,346871230.0,167362420.0,140486420.0,186923460.0,163456770.0,249238110.0,318699300.0,325383230.0,52047384.0,95620120.0,202914190.0,310612670.0,289033300.0,233746460.0,566257000.0,309147260.0,211750430.0,197801090.0,93774480.0,54541588.0,209369070.0,261716340.0,584899100.0,219669650.0,316235360.0,428031520.0,209397600.0,307910600.0,281835000.0,357124060.0,180688110.0,239177200.0,124883480.0,275977470.0,442674700.0,269128260.0,153219920.0,597601900.0,359578720.0,300028000.0,106665224.0,100305060.0,204829940.0,341734340.0,196705010.0,193376800.0,216446640.0,332725200.0,569350900.0,153075920.0,308560060.0,208734180.0,123613210.0,229790660.0,232261920.0,};
+int32ptr = (int32_t*)&buffer0[38816];//gradients
+for(int i = 0; i < 96; i++) v13_conv_2_bias[i] -= (int32_t)(int32ptr[i] * blr * v13_conv_2_bias_QAS[i]);
+/* layer 92:GROUP_CONV */
+const float v14_conv_0_weight_QAS[576] = {1376038.0,2123140.8,2197942.2,1580908.2,991710.1,2650744.2,1813330.6,1637596.2,1920656.8,2678280.2,3221738.0,1969980.1,2373114.5,1963930.6,829869.75,1300116.8,1143284.9,1260906.2,1080500.5,2776620.8,1611380.0,1778144.2,2290585.5,1707436.1,966907.8,1086650.5,1650761.9,4511006.5,1669068.1,1742939.2,2990809.2,2313299.8,2343790.0,2587335.8,3342293.0,1973121.1,2031134.0,1557079.4,1922614.2,2493012.0,1828469.8,4025648.8,1101959.4,1485686.9,1956950.5,3397141.0,1748593.1,2318990.8,1702171.5,2916821.8,2793186.5,3249617.2,2630243.5,2164884.8,1543950.0,1890883.0,1745335.5,3284063.2,2171070.0,2476636.5,2459459.5,1823242.2,2053001.5,2330964.0,1556826.9,3011278.2,3197029.0,1148659.0,2992570.0,3960855.2,1144702.4,1130373.6,1903244.8,3640622.8,1671628.1,2325848.0,1138590.9,1764467.0,1996590.2,1129309.6,2212965.8,1610876.9,1873724.5,3102736.5,2339637.2,2445065.8,1251010.0,1216741.8,1606100.0,1367935.2,1934369.0,2498418.8,2670365.8,1851112.9,1556521.4,1525351.5,2506094.2,1722323.9,1534796.2,1874242.1,2634944.5,2756811.2,3322626.2,3504977.0,1465624.4,1786557.0,2005352.6,1763458.6,2206593.8,1697319.1,1442694.4,1060681.9,2183035.5,1456017.4,5167154.0,779888.5,2180914.5,2430613.8,1541968.6,1552818.5,1370861.0,3165190.0,1707481.9,2912187.0,2865740.5,2053589.9,1199460.1,2457009.2,2603775.5,1936061.4,2138857.0,1176119.4,2912501.5,2097187.5,2906263.2,1539201.6,2626783.0,2706144.5,1365008.9,1509190.5,1932469.8,1633052.5,1313323.1,2564489.8,1481502.9,1391364.6,1906010.8,2532090.8,2711460.0,4396734.5,1771853.4,1483131.1,2015160.8,1736929.0,2329999.8,1538647.6,941741.4,2827132.5,2227549.8,2421654.5,2405101.8,1027041.5,1571578.0,1414070.0,3637259.2,5147771.0,2553491.0,1463916.9,3152845.8,2627546.5,900025.1,2421172.5,1276770.0,1915587.0,2010876.6,2718395.8,1729243.4,2212538.5,1489416.5,2142871.2,1056400.1,2013393.6,3043550.2,2663891.8,2647891.0,1372169.6,1663052.9,3360139.0,2471362.8,1534684.4,2122393.8,1880385.0,2588899.5,1725027.1,2481462.8,1754438.5,2627874.8,2466073.5,766781.94,2300072.8,2931250.2,2182638.0,2639220.5,2550729.0,1293910.4,1951694.1,1842932.9,2369271.5,1711774.8,1935562.5,1704592.0,2959783.8,2198020.5,3480230.2,1198300.9,835118.7,2049047.1,1439837.8,1591064.5,1607270.6,2060500.8,1554578.4,2955564.0,2192429.8,3011270.2,2343610.0,1520382.2,2827427.5,1990262.1,3241492.0,2139848.0,2676641.5,2917344.8,1585662.1,1532321.9,2846694.5,2859795.5,3793891.5,3342222.5,2064901.5,1118703.5,1210187.4,1340464.0,1947731.5,2952485.0,1353214.6,2711062.5,3234384.2,2361925.8,1309503.4,917189.75,2444541.0,2513025.0,1972324.5,2093048.2,3351754.8,1475566.2,1752815.2,1862112.2,1994784.0,2151987.8,1777830.5,1835687.5,1806912.6,1515848.2,1437925.8,2160524.2,2264157.5,2364531.0,2329766.2,1301013.2,2342423.8,1102678.0,1666932.4,2048859.5,2583589.8,1074493.4,3062120.0,1397194.5,2126442.2,1918104.6,2952490.5,2627641.0,1254810.1,1782674.9,1467380.5,1023157.4,2269024.8,1728173.0,2557422.2,1563342.6,2104232.8,2161342.8,2223791.2,2434904.2,1562218.4,2443409.5,5293621.5,2952910.5,885867.44,3227936.5,639284.06,1490506.6,3293622.8,2652573.0,2441292.8,2201424.0,1034155.44,1696592.2,2549501.0,3122831.5,1072097.9,4022575.8,1412882.4,1366397.1,2565808.0,4055886.0,927648.9,3154987.5,1660384.1,1552645.8,2764905.8,1814914.9,1679466.2,1621209.6,2863229.5,1763091.6,2597992.5,1278959.9,964988.06,2047750.1,2257981.8,2485033.2,1649021.1,3044755.5,1493169.9,1603275.9,1495097.6,3068436.5,1410936.6,3577103.8,4422074.0,1347381.5,1191273.4,1820197.4,2878055.0,2086464.2,1888692.9,2222194.8,1894289.8,3854836.0,2214451.0,996906.3,3064124.0,1952698.9,1645185.5,1761805.2,979951.3,2647824.2,2771052.2,2247546.5,1631324.1,2370300.5,1130910.6,2781467.5,2179415.5,2168012.5,2899465.8,963467.25,2847465.5,992194.8,2455549.0,1792634.2,1644664.8,2847694.8,3283086.5,587152.56,1996822.0,2293188.0,2303813.0,1666507.2,2012814.0,893653.5,1806147.4,2362729.8,2582480.8,1877496.4,1864586.1,1889308.6,1853791.5,2437719.8,1146234.0,1284994.0,2945463.8,1555531.5,1270565.1,1493851.0,1624650.0,1522036.6,1816369.2,2536180.8,2130953.8,3303925.5,2162609.8,1680016.2,3260968.8,3060125.5,4510334.5,1687134.9,2323621.2,1886808.0,1614300.8,669007.06,2419217.0,1630773.6,2629444.0,2049667.6,1900195.2,3558340.8,1751170.4,3343608.5,2041780.1,2461169.8,1930047.5,1877863.8,2607827.2,1788615.2,2621059.2,3086534.8,2211510.5,1749717.6,1369972.6,1300012.5,1895309.2,1460847.9,2493734.8,2661580.2,1085918.5,2558090.0,721314.3,2293493.8,1301560.8,1164421.5,3335826.5,1947151.6,3513273.5,2501253.2,1483564.9,2502013.8,2042451.2,4285478.5,1107737.0,2191106.5,2306163.5,4073569.0,1966361.2,1859654.0,1303789.0,1819314.0,3221050.2,1851251.8,1372744.9,2268937.5,1330453.8,2785277.2,4762744.5,1267095.4,1749253.8,2822210.5,2788980.8,2372696.8,1239586.1,1939889.0,1877719.8,1776143.2,1396063.6,2094773.2,1555026.4,1279583.4,2625428.8,3015277.0,1319539.0,1732174.4,4692688.5,4240882.0,4151839.2,2664314.0,1533868.2,908332.06,2312753.2,3116861.2,1727749.2,1614861.0,2295688.0,2783052.8,2289326.0,2365584.8,1490210.2,2009327.2,2699189.5,1323265.9,1528796.4,1558254.4,2031315.4,2434728.5,3464688.0,1955583.2,2482563.0,1500499.4,2809700.5,2481113.2,2330971.0,1243920.9,2075214.1,1688408.8,2315177.0,1516815.5,1798264.0,1749660.4,4776321.0,3404962.0,1228953.0,2990231.0,2173572.5,2046725.4,1542735.9,2153691.2,2531092.0,1623715.5,1405696.2,1723372.5,2336096.5,2380144.2,2101475.0,1440881.5,1525408.5,1317677.1,2077479.0,2134410.5,2205382.5,2386331.5,1265739.4,975405.1,2068695.5,2039932.0,1079620.8,1909124.6,1464280.1,2327919.5,2713689.8,1560466.8,3748145.2,1839644.4,1342804.8,1187473.5,1376409.2,2173395.8,4532490.5,1216053.6,1019967.06,1648098.1,2593466.2,2176787.2,1189011.1,601968.75,2999054.0,3013510.2,2746327.8,2672861.5,2357947.2,3802516.8,1210647.9,1240483.0,1643169.6,1299131.9,2781959.2,};
+group_conv_kernel4_stride1_pad0_in4x4_out1x1_uniweight_4row16col_int8input_int8weight_inplace_revised((float*)&buffer0[42080],4,4,24,weight_fp48,NULL,v14_conv_0_weight,1,1,13824,-FLT_MAX,FLT_MAX,(float*)sbuf, &buffer0[38816], 1, 24, v14_conv_0_weight_QAS, lr);
+/* layer 93:TRANSPOSE_CONV_2D */
+pointwise_conv_4row4col_IOHW_int8input_int8w((float*)&buffer0[53600],4,4,96,(q7_t*)v13_conv_2_weight,NULL,(float*)&buffer0[38816],4,4,384,-FLT_MAX,FLT_MAX,(float*)sbuf, &buffer0[55136], 1);
+/* layer 94:WHERE */
+where_zeros_int8_inplace_bit((bool*)&buffer0[38048],6144,(signed char*)&buffer0[38816]);
+/* layer 95:SUM */
+sum_4D_exclude_int8((signed char*)&buffer0[38816],1,4,4,384,3,(int32_t*)&buffer0[44960]);
+/* layer 96:BIAS_UPDATE */
+const float v13_conv_1_bias_QAS[384] = {29903106.0,218695170.0,30306388.0,21724138.0,535217340.0,16003526.0,32152158.0,187248000.0,11008200.0,10799484.0,33226112.0,25116114.0,13621018.0,88510960.0,216415630.0,36400264.0,20554932.0,85092610.0,13933570.0,40355590.0,19902466.0,162674620.0,8.514448e+20,34753044.0,36432384.0,106568250.0,21425456.0,62075030.0,56788890.0,218641630.0,62288770.0,78014410.0,38646750.0,21849236.0,10505907.0,84220616.0,165009550.0,27466204.0,27632670.0,24674206.0,243689440.0,136897330.0,64120964.0,192845090.0,33581936.0,294545250.0,19203338.0,8347400.5,44178140.0,98293650.0,46789390.0,85510260.0,115284230.0,406463070.0,47568624.0,39491936.0,1425052300.0,110039064.0,84780000.0,98775730.0,5429590.5,54328024.0,40784012.0,14251685.0,19731754.0,49599268.0,143573600.0,52199044.0,64020470.0,8.514448e+20,63777044.0,1240437900.0,23135490.0,104101800.0,37786950.0,59503050.0,32931996.0,8.514448e+20,23411048.0,28174422.0,41912440.0,1129791900.0,45772176.0,576092160.0,43555050.0,59650776.0,58871796.0,52104410.0,180291150.0,45319780.0,630081300.0,33330492.0,25461428.0,60240560.0,21556068.0,16496781.0,220467540.0,25849228.0,68962510.0,60926360.0,23426336.0,8.514448e+20,70230640.0,64390164.0,48119532.0,681097900.0,149453680.0,20411554.0,2068529.8,101910424.0,32540704.0,116077410.0,101141944.0,28197638.0,288374460.0,97656350.0,125656240.0,697916000.0,94551580.0,7238937.0,30893486.0,31146326.0,47771092.0,22109046.0,181613490.0,156987170.0,10137324.0,14380247.0,23749974.0,34948384.0,28464574.0,35196444.0,184802720.0,18045186.0,8.514448e+20,972604200.0,176434930.0,35577184.0,350785000.0,45171788.0,20368120.0,100501416.0,689966660.0,66735710.0,91060700.0,150600080.0,55002780.0,61597720.0,21528004.0,51178550.0,58461624.0,23989124.0,23032286.0,51682744.0,142413460.0,105533640.0,19441712.0,34129590.0,27312670.0,86819570.0,26903978.0,75896120.0,16438411.0,15282757.0,18410920.0,31545624.0,29712804.0,20630142.0,212912900.0,208794450.0,22804224.0,8.514448e+20,57922828.0,72065770.0,54211576.0,478728800.0,40695136.0,56643690.0,22905564.0,73612504.0,138857460.0,1020830100.0,11712604.0,29323960.0,32946764.0,32294184.0,33965812.0,44834436.0,96104920.0,44905708.0,106658530.0,52512044.0,88080680.0,100838840.0,52295196.0,84067410.0,51566480.0,22363844.0,42417760.0,19235632.0,41795750.0,2364194600.0,176797940.0,22229236.0,65894810.0,14518711.0,37160068.0,60382000.0,29139062.0,52835044.0,49179852.0,25524106.0,33450300.0,71744744.0,139331860.0,105134560.0,1343524200.0,121738936.0,66152212.0,234290320.0,91344690.0,62273204.0,28954232.0,9760435.0,117927130.0,23199580.0,34121540.0,1007458900.0,19002262.0,23868702.0,18456332.0,24511972.0,23436084.0,33889172.0,37044356.0,45994308.0,78664400.0,19103196.0,20565574.0,25134748.0,41795270.0,78745440.0,25432282.0,36809604.0,22888154.0,40720704.0,98644840.0,30299742.0,36693624.0,16980772.0,19945392.0,216585360.0,113229760.0,8.514448e+20,23825210.0,79609320.0,14199620.0,868785800.0,63508516.0,28225906.0,43626556.0,26480122.0,304683600.0,30790816.0,32378780.0,59837400.0,115109340.0,177095550.0,35438440.0,78271360.0,13395547.0,245560660.0,355709800.0,110673030.0,833379900.0,21303774.0,12327210.0,28411482.0,37121492.0,93276590.0,2403352.0,14007026.0,60998384.0,82678340.0,25447940.0,21988886.0,77557730.0,78396560.0,381440060.0,163138900.0,535285020.0,27119984.0,8.514448e+20,22378012.0,265606290.0,166443070.0,55623184.0,29839490.0,24620542.0,30222376.0,31380324.0,31162294.0,62026920.0,22052116.0,36080496.0,47588308.0,19013760.0,110051660.0,84972930.0,73442910.0,36334824.0,11475609.0,312681630.0,68187690.0,30441394.0,36119148.0,112473000.0,280030850.0,30804322.0,29880286.0,35358196.0,8.514448e+20,84218910.0,36732496.0,1307728100.0,23856358.0,165226740.0,51993308.0,8.514448e+20,31531298.0,249580770.0,39758644.0,31771484.0,34759572.0,102811704.0,23604470.0,31572148.0,47229416.0,8.514448e+20,27637554.0,57290044.0,138265900.0,42498036.0,22459320.0,24007922.0,108555000.0,39797216.0,51128264.0,17208626.0,8.514448e+20,46867080.0,66854470.0,28288860.0,16591960.0,172624800.0,43966544.0,23823556.0,8489910.0,28979696.0,107371800.0,27236328.0,31858474.0,75676580.0,31478474.0,7945755.0,36691710.0,20057414.0,50837704.0,42353784.0,8.514448e+20,145009040.0,697708700.0,45465740.0,521025920.0,37596176.0,21722252.0,60942212.0,25127978.0,710074900.0,1101367600.0,90038510.0,74934250.0,8.514448e+20,64313932.0,};
+int32ptr = (int32_t*)&buffer0[44960];//gradients
+for(int i = 0; i < 384; i++) v13_conv_1_bias[i] -= (int32_t)(int32ptr[i] * blr * v13_conv_1_bias_QAS[i]);
+/* layer 97:TRANSPOSE_CONV_2D */
+transpose_depthwise_conv_kernel5_stride1_inpad2_outpad0_revised_IOHW((float*)&buffer0[38816],4,4,384,v13_conv_1_weight,NULL,(float*)&buffer0[38816],4,4,384,-FLT_MAX,FLT_MAX,(float*)sbuf, &buffer0[44960], 1, 0);
+/* layer 98:WHERE */
+where_zeros_int8_inplace_bit((bool*)&buffer0[37280],6144,(signed char*)&buffer0[38816]);
+/* layer 99:SUM */
+sum_4D_exclude_int8((signed char*)&buffer0[38816],1,4,4,384,3,(int32_t*)&buffer0[37280]);
+/* layer 100:BIAS_UPDATE */
+const float v13_conv_0_bias_QAS[384] = {6218774000.0,3655683800.0,4025783800.0,2553552400.0,1573439900.0,1095861600.0,3012372200.0,2777113900.0,761768300.0,3771176700.0,3574636000.0,8691896000.0,3036402200.0,1724976000.0,685664600.0,1073968500.0,1804135600.0,2191398100.0,1821529300.0,5283446300.0,4263397000.0,2276812500.0,6.4540545e+19,4234068000.0,1748282000.0,964335940.0,3552744400.0,1359091600.0,4323833000.0,1872564000.0,1488891500.0,3862231600.0,6268766000.0,2438708500.0,1655078900.0,3378801000.0,2838569500.0,1017552450.0,5908493300.0,3654168800.0,3148908300.0,1547238800.0,988844350.0,3815565800.0,2178253600.0,1079768700.0,3168508000.0,2190347500.0,684622340.0,1716071400.0,1310837100.0,2729751300.0,4372761000.0,1094751500.0,1885218600.0,3021010000.0,1250654800.0,763530430.0,4148253000.0,3617149700.0,1183229600.0,2562792200.0,2781286700.0,2710524700.0,1975316900.0,1297935000.0,2870464300.0,2654215000.0,3112936000.0,6.4540545e+19,1756145000.0,2001426200.0,3125140500.0,3793797600.0,1727468800.0,3925337600.0,5689981400.0,6.4540545e+19,3438579200.0,582194600.0,3111272200.0,2231951400.0,3126232600.0,1222943000.0,4747296300.0,1998135600.0,2614590700.0,2600152000.0,1791896400.0,2153195500.0,3365325300.0,5975375000.0,4788534000.0,2194499600.0,5548968000.0,3320401200.0,1427101700.0,3381228000.0,3586954200.0,1195268600.0,3247417900.0,6.4540545e+19,2153742300.0,2611620600.0,4444410000.0,4090424300.0,1524046100.0,1042931100.0,4638144000.0,4641611000.0,3583312000.0,3960049200.0,4833686500.0,3446786800.0,1081646600.0,782966340.0,1756297600.0,1948061700.0,2643361800.0,1301894500.0,1428760300.0,4288829000.0,3919010600.0,2344144600.0,919689100.0,2324802300.0,1238316800.0,1418477200.0,2283643000.0,4231538200.0,2522716700.0,5533971500.0,2962834400.0,2876232000.0,6.4540545e+19,1863885200.0,1620246300.0,5678483000.0,2110078500.0,2458661400.0,1882340200.0,786495040.0,1169366700.0,2111179400.0,3585948700.0,3423332900.0,7283285000.0,4650178600.0,2218300700.0,3173031400.0,3549933600.0,1720029400.0,5499190000.0,1270336600.0,2229560600.0,4930055000.0,2109084400.0,3369081900.0,1452618900.0,3383978000.0,2294657500.0,3072205000.0,3735657700.0,902825660.0,3094816000.0,2909646000.0,2488696600.0,1998046600.0,2408844800.0,1841184300.0,3220803300.0,6.4540545e+19,4333779500.0,3132397300.0,1364643000.0,3476246300.0,2576431400.0,3625121000.0,2080053600.0,2014506500.0,2807186200.0,2050715900.0,4277033000.0,2017156100.0,1668210300.0,1533583600.0,4565575700.0,4990597600.0,1677164400.0,2696547600.0,2567651300.0,3378558200.0,1497617200.0,2948733000.0,2861216300.0,2033264500.0,5331606500.0,3027645000.0,1566484200.0,1331578200.0,1479618600.0,904620900.0,3018522600.0,4916824000.0,1746880600.0,1856318700.0,7332025000.0,2200847400.0,3405922000.0,1213794300.0,4213964300.0,4341902300.0,1245220000.0,4376626000.0,7956229000.0,2030982000.0,2440010800.0,4072967700.0,2198071000.0,2278283800.0,1924683900.0,2201240600.0,4866540000.0,1399736400.0,2595831000.0,2117742700.0,4469250600.0,2274346800.0,1353044900.0,3117955600.0,1992863700.0,1313300400.0,2969270000.0,2770915000.0,1065277400.0,873739900.0,3889906700.0,2895561700.0,2608214000.0,2339272700.0,1831300500.0,2168545500.0,2939032000.0,3494531800.0,1346712800.0,2055590400.0,1048361800.0,3326954500.0,2906894300.0,4390433000.0,5230125600.0,2800091400.0,2892284200.0,6.4540545e+19,2299110700.0,4648113700.0,1018604900.0,365536000.0,2133898000.0,2222018600.0,2936011800.0,4279367200.0,2876851500.0,2206437600.0,2805782500.0,3802612200.0,1691852200.0,3116817200.0,2988988200.0,3470097200.0,678116200.0,1985151500.0,2660800300.0,3027061000.0,5284247600.0,1779763100.0,2385741800.0,4025605400.0,1749066900.0,2965630500.0,1691411200.0,2734037000.0,5797724700.0,3967366400.0,2732758500.0,2383597800.0,1421569800.0,4434281000.0,3909362400.0,3465807000.0,1789423400.0,5695254000.0,6.4540545e+19,1925940600.0,1215265800.0,2184526300.0,3532325400.0,2546660900.0,1066540160.0,2692514600.0,1810779600.0,1661833600.0,1745124500.0,1957702700.0,3146242300.0,2661046500.0,2856432000.0,3023174700.0,3567440400.0,2730573800.0,5689904000.0,1918862300.0,2269911800.0,1785945700.0,2749466000.0,4697850000.0,1645029100.0,2927824600.0,5085659600.0,3561831700.0,5456234500.0,6.4540545e+19,3296790300.0,4769472500.0,1904915600.0,1177256300.0,1573386200.0,1282618500.0,6.4540545e+19,2721441000.0,1333981600.0,3156787000.0,1516863100.0,2939711500.0,1823237400.0,3306214000.0,2206616000.0,2554347800.0,6.4540545e+19,3702762500.0,1360204700.0,2267084000.0,2767849700.0,4147105500.0,3619621000.0,1738791600.0,5862744000.0,2841494800.0,1243502200.0,6.4540545e+19,2759690500.0,1891875300.0,4226381800.0,2920187400.0,1999094800.0,1496611800.0,3497114000.0,2092673000.0,1781992400.0,977630700.0,1443327400.0,757286850.0,1227997800.0,1888430200.0,3479004400.0,3747829800.0,4297170400.0,4356546000.0,4411444000.0,6.4540545e+19,2125595800.0,2704379600.0,1672170900.0,3533985000.0,2002610700.0,2331888600.0,3538415000.0,1111041500.0,2146001900.0,2001717800.0,2241361400.0,1805678500.0,6.4540545e+19,4455689700.0,};
+int32ptr = (int32_t*)&buffer0[37280];//gradients
+for(int i = 0; i < 384; i++) v13_conv_0_bias[i] -= (int32_t)(int32ptr[i] * blr * v13_conv_0_bias_QAS[i]);
+/* layer 101:STRIDED_SLICE */
+const uint16_t begin1[] = {0, 0, 0, 0};
+const uint16_t end1[] = {1, 12, 4, 4};
+const uint16_t strides1[] = {1};
+strided_slice_4Dto4D_int8((signed char*)&buffer0[35744],1,96,4,4,begin1,end1,strides1,(signed char*)&buffer0[37280],1,12,4,4);
+/* layer 102:TRANSPOSE_CONV_2D */
+pointwise_conv_4row4col_4innercol_IOHW_int8input_int8w_partialCH((float*)&buffer0[38816],4,4,384,(q7_t*)v13_conv_0_weight,(q7_t*)v13_conv_0_weightFlash,12,NULL,(float*)&buffer0[35744],4,4,96,-FLT_MAX,FLT_MAX,(float*)sbuf, &buffer0[44960], 1);
+/* layer 103:WHERE */
+where_zeros_int8_inplace_bit((bool*)&buffer0[34208],1536,(signed char*)&buffer0[35744]);
+/* layer 104:CAST */
+fptr = (float*)&buffer0[44960];
+int8ptr = (int8_t*)&buffer0[35744];
+for(int i = 0; i < 1536; i++) fptr[i] = (float)int8ptr[i];
+/* layer 105:DIV */
+fptr3 = (float*)&buffer0[51104]; fptr2 = (float*)&buffer0[44960];
+for(int i = 0; i < 1536; i++) *fptr3++ = *fptr2++ / 0.03161676228046417;
+/* layer 106:MUL */
+fptr = (float*)&buffer0[51104];fptr3 = (float*)&buffer0[57248];for(int i = 0; i < 1536; i++) fptr3[i] = 0.02220197580754757 * fptr[i];
+/* layer 107:CAST */
+int8ptr = (int8_t*)&buffer0[44960];
+fptr = (float*)&buffer0[57248];
+for(int i = 0; i < 1536; i++) int8ptr[i] = (int8_t)fptr[i];
+/* layer 108:WHERE */
+where_zeros_int8_inplace_bit((bool*)&buffer0[34016],1536,(signed char*)&buffer0[44960]);
+/* layer 109:SUM */
+sum_4D_exclude_int8((signed char*)&buffer0[44960],1,4,4,96,3,(int32_t*)&buffer0[34016]);
+/* layer 110:BIAS_UPDATE */
+const float v12_conv_2_bias_QAS[96] = {795028030.0,423624300.0,479252960.0,478791100.0,896438900.0,361995970.0,1020356860.0,1440235000.0,1393280600.0,817915500.0,616777300.0,766457150.0,783091840.0,417292930.0,1323931900.0,384448220.0,275395330.0,517444160.0,423124500.0,507065340.0,1057349570.0,965357950.0,635712300.0,764407550.0,1123631200.0,503342620.0,420479680.0,474280900.0,438251900.0,968981500.0,438337150.0,538776500.0,588037440.0,1068639300.0,973549950.0,811783400.0,405616100.0,806178050.0,646484030.0,784293600.0,376276260.0,320535780.0,589879740.0,215542480.0,759753540.0,513519420.0,618079040.0,1282527200.0,615622900.0,196468270.0,260889140.0,542197440.0,720725000.0,638961800.0,471709540.0,1136323800.0,549965400.0,615306050.0,804758800.0,376068600.0,373630050.0,573741250.0,642607740.0,200830430.0,396703740.0,796792300.0,836330430.0,361802240.0,517987840.0,593386050.0,648856100.0,370742660.0,753040500.0,188531440.0,384764380.0,716875900.0,773829950.0,576809150.0,1390649200.0,725712700.0,805873000.0,169132160.0,462125800.0,390630270.0,485278620.0,386392300.0,309343230.0,438246530.0,698687100.0,1022324160.0,591663040.0,708810800.0,436116100.0,496532480.0,786962940.0,755363200.0,};
+int32ptr = (int32_t*)&buffer0[34016];//gradients
+for(int i = 0; i < 96; i++) v12_conv_2_bias[i] -= (int32_t)(int32ptr[i] * blr * v12_conv_2_bias_QAS[i]);
+/* layer 111:GROUP_CONV */
+const float v13_conv_0_weight_QAS[384] = {6216408.5,3654293.5,4024252.8,2552581.5,1572841.6,1095444.9,3011226.5,2776057.5,761478.56,3769742.5,3573276.8,8688590.0,3035247.5,1724319.9,685403.75,1073560.0,1803449.2,2190564.5,1820836.9,5281436.5,4261775.5,2275946.5,6.4515992e+16,4232457.5,1747617.2,963969.25,3551393.5,1358574.6,4322188.5,1871851.6,1488325.1,3860763.0,6266382.5,2437781.0,1654449.2,3377515.8,2837489.8,1017165.5,5906246.0,3652779.0,3147710.8,1546650.2,988468.1,3814114.5,2177425.2,1079358.0,3167303.0,2189514.5,684362.06,1715418.6,1310338.5,2728713.2,4371097.5,1094335.1,1884501.6,3019861.2,1250179.1,763240.06,4146675.5,3615773.8,1182779.5,2561817.5,2780228.8,2709494.0,1974565.5,1297441.2,2869372.5,2653205.2,3111752.0,6.4515992e+16,1755477.1,2000665.1,3123951.8,3792354.8,1726811.8,3923844.0,5687817.5,6.4515992e+16,3437272.0,581973.25,3110088.8,2231102.8,3125043.5,1222477.9,4745490.5,1997375.2,2613596.5,2599163.5,1791214.9,2152376.2,3364045.2,5973102.0,4786712.0,2193665.0,5546858.0,3319138.2,1426558.6,3379942.0,3585590.2,1194814.0,3246182.8,6.4515992e+16,2152923.0,2610627.5,4442719.5,4088868.2,1523466.2,1042534.5,4636380.0,4639846.0,3581949.5,3958542.8,4831847.5,3445475.8,1081235.1,782668.7,1755629.6,1947320.6,2642356.2,1301399.4,1428216.8,4287197.5,3917520.5,2343253.2,919339.4,2323918.2,1237845.8,1417937.9,2282774.0,4229929.0,2521757.2,5531866.5,2961707.5,2875138.0,6.4515992e+16,1863176.4,1619630.0,5676324.0,2109275.8,2457726.2,1881624.2,786196.0,1168921.9,2110376.2,3584584.2,3422030.5,7280514.5,4648410.0,2217457.0,3171824.8,3548583.2,1719375.4,5497098.0,1269853.5,2228712.5,4928179.5,2108282.2,3367800.8,1452066.4,3382690.5,2293784.8,3071037.0,3734237.2,902482.4,3093639.0,2908539.5,2487750.0,1997287.0,2407928.8,1840484.1,3219578.2,6.4515992e+16,4332131.0,3131206.0,1364123.9,3474924.2,2575451.5,3623741.8,2079262.6,2013740.0,2806118.2,2049935.8,4275406.0,2016388.9,1667575.6,1533000.4,4563839.5,4988699.5,1676526.6,2695522.2,2566675.0,3377273.0,1497047.5,2947611.5,2860127.8,2032491.4,5329578.5,3026493.5,1565888.4,1331071.8,1479055.6,904277.0,3017374.5,4914954.0,1746216.2,1855612.6,7329236.0,2200010.0,3404627.0,1213332.8,4212361.5,4340251.0,1244746.2,4374961.5,7953203.5,2030209.5,2439082.2,4071419.0,2197235.0,2277417.2,1923951.8,2200403.2,4864688.5,1399204.2,2594843.8,2116937.2,4467550.5,2273481.8,1352530.4,3116769.5,1992105.8,1312800.9,2968140.8,2769861.5,1064872.2,873407.56,3888427.2,2894460.2,2607222.0,2338383.2,1830603.9,2167720.8,2937914.5,3493202.2,1346200.6,2054808.4,1047963.0,3325689.2,2905788.5,4388762.5,5228136.0,2799026.5,2891184.0,6.4515992e+16,2298236.5,4646346.0,1018217.5,365396.94,2133086.0,2221173.5,2934895.2,4277739.5,2875757.2,2205598.5,2804715.0,3801166.0,1691208.6,3115631.5,2987851.0,3468777.5,677858.25,1984396.4,2659788.2,3025909.2,5282237.5,1779086.2,2384834.5,4024074.2,1748401.4,2964502.8,1690768.0,2732997.0,5795519.5,3965857.8,2731718.8,2382691.0,1421029.2,4432594.0,3907875.2,3464489.2,1788742.8,5693087.5,6.4515992e+16,1925208.1,1214803.5,2183695.5,3530982.0,2545692.2,1066134.5,2691490.8,1810090.9,1661201.4,1744461.0,1956958.0,3145045.5,2660034.0,2855345.5,3022025.2,3566083.2,2729535.2,5687740.0,1918132.6,2269048.2,1785266.5,2748420.0,4696063.5,1644403.4,2926710.8,5083725.5,3560476.5,5454159.0,6.4515992e+16,3295536.8,4767658.5,1904191.0,1176808.6,1572787.6,1282130.6,6.4515992e+16,2720406.2,1333474.1,3155586.2,1516286.1,2938593.5,1822544.1,3304956.2,2205777.0,2553376.2,6.4515992e+16,3701354.0,1359687.4,2266221.8,2766797.0,4145527.5,3618244.2,1738130.0,5860514.5,2840414.0,1243029.2,6.4515992e+16,2758641.0,1891155.6,4224774.5,2919077.0,1998334.2,1496042.9,3495784.2,2091877.0,1781314.6,977258.9,1442778.5,756998.9,1227530.8,1887712.0,3477681.5,3746404.0,4295536.0,4354889.5,4409766.0,6.4515992e+16,2124787.2,2703351.2,1671534.9,3532641.0,2001849.1,2331001.8,3537069.0,1110618.9,2145186.0,2000956.6,2240509.0,1804991.8,6.4515992e+16,4453995.5,};
+group_conv_kernel4_stride1_pad0_in4x4_out1x1_uniweight_4row16col_int8input_int8weight_inplace_revised((float*)&buffer0[37280],4,4,12,weight_fp52,NULL,v13_conv_0_weight,1,1,4608,-FLT_MAX,FLT_MAX,(float*)sbuf, &buffer0[34016], 1, 12, v13_conv_0_weight_QAS, lr);
+/* layer 112:TRANSPOSE_CONV_2D */
+pointwise_conv_4row4col_IOHW_int8input_int8w((float*)&buffer0[44960],4,4,96,(q7_t*)v12_conv_2_weight,NULL,(float*)&buffer0[34016],4,4,384,-FLT_MAX,FLT_MAX,(float*)sbuf, &buffer0[46496], 1);
+/* layer 113:WHERE */
+where_zeros_int8_inplace_bit((bool*)&buffer0[33248],6144,(signed char*)&buffer0[34016]);
+/* layer 114:SUM */
+sum_4D_exclude_int8((signed char*)&buffer0[34016],1,4,4,384,3,(int32_t*)&buffer0[40160]);
+/* layer 115:BIAS_UPDATE */
+const float v12_conv_1_bias_QAS[384] = {680649200.0,69443840.0,241322860.0,80489496.0,80691630.0,294001250.0,107731150.0,52987056.0,32530756.0,24586336.0,119902000.0,47630390.0,96925370.0,21572388.0,30960382.0,119762040.0,28125472.0,69059064.0,1105776800.0,47085650.0,54227330.0,23889654.0,72401620.0,3.4511303e+16,113776120.0,45162532.0,9.708138e+20,124803704.0,17816108.0,144262860.0,331772300.0,135888900.0,164727540.0,194066880.0,154027940.0,55157268.0,27045502.0,97904820.0,54438700.0,303278660.0,12362003.0,1042228350.0,643438140.0,60179332.0,39908252.0,163291120.0,517501730.0,170270290.0,227213740.0,1370298000.0,115288136.0,280747400.0,175949800.0,33373296.0,48514708.0,41199920.0,78254720.0,9.708138e+20,453542900.0,88115530.0,146622220.0,10955774.0,1672740900.0,63418460.0,25068528.0,49819490.0,37846076.0,39181356.0,73032000.0,92893120.0,6528928.0,100887620.0,121488056.0,831450940.0,141784590.0,188391170.0,72439230.0,88022510.0,90558090.0,191907090.0,380063940.0,36673228.0,281133220.0,193172080.0,37085428.0,274824320.0,14769999.0,176138460.0,95463016.0,19472444.0,328781570.0,38959136.0,47053252.0,156587490.0,29402610.0,115884376.0,35218770.0,61586468.0,634546600.0,60442856.0,236849220.0,27113518.0,18367392.0,73647870.0,22987670.0,113493060.0,200594910.0,307410620.0,72727040.0,56567316.0,37424616.0,921706750.0,153012300.0,121281090.0,24853752.0,61172724.0,49337680.0,182255100.0,24415668.0,65750696.0,55503460.0,37280652.0,1258082300.0,99035340.0,133413880.0,27096782.0,121029600.0,56115252.0,30667618.0,47280856.0,9.708138e+20,113290990.0,40715724.0,357438750.0,36486670.0,172003070.0,261998830.0,187449120.0,51582920.0,334937570.0,55945830.0,944658560.0,109379440.0,89333770.0,337961920.0,987207000.0,31556666.0,148114180.0,41062480.0,52236652.0,165748370.0,69615970.0,59515556.0,322113380.0,425687420.0,36736120.0,43174200.0,191407570.0,38773124.0,16738277.0,84924260.0,128233330.0,48222108.0,24441116.0,58718372.0,62130484.0,70179630.0,33736096.0,73848780.0,761925000.0,90858456.0,38253724.0,284263780.0,42319870.0,1084416100.0,122633180.0,18796978.0,20323764.0,9.708138e+20,73665690.0,282964500000000.0,3.4680817e+20,69947290.0,104142640.0,31024776.0,10167363.0,31862356.0,130711080.0,49809760.0,113956620.0,75655860.0,21221994.0,155463920.0,130742504.0,189932740.0,133679670.0,55810700.0,33437294.0,35320364.0,306550720.0,108544600.0,58353850.0,82360730.0,159779230.0,97278880.0,114619010.0,59246020.0,114979150.0,118233440.0,30607828.0,84174850.0,34790910.0,176133380.0,43541028.0,108081770.0,33076980.0,35958616.0,35044764.0,213399630.0,1208276500.0,111141230.0,39859172.0,28398308.0,37453444.0,517015170.0,104045630.0,90151120.0,132066330.0,53671510.0,40765060.0,128265220.0,79884990.0,21395194.0,56846548.0,55997920.0,154076080.0,35897896.0,85285580.0,37287464.0,44771570.0,65000536.0,30918738.0,114472584.0,22731470.0,131453960.0,53656350.0,493477120.0,366332160.0,46090508.0,249981000.0,56240092.0,61729080.0,819527600.0,48934690.0,22435840.0,17833398.0,63885404.0,33058492.0,28890800.0,59674296.0,58250664.0,79550050.0,83156504.0,27791218.0,183412690.0,78321480.0,74524310.0,451072580.0,31507766.0,253719600.0,47475730.0,344763170.0,602704600.0,58548130.0,38813570.0,64482676.0,34223570.0,729680500.0,129350660.0,81558320.0,151623630.0,85952140.0,569547400.0,126092220.0,186059230.0,40756330.0,222430380.0,250228900.0,87782350.0,62698530.0,94738280.0,35568124.0,123619200.0,951448700.0,53220690.0,43804164.0,116273704.0,20950906.0,90746190.0,106682990.0,212486860.0,297780580.0,84009810.0,20731540.0,1085934700.0,115616184.0,92536540.0,153480340.0,149813940.0,1357518700.0,53056396.0,13452287.0,152835580.0,45520680.0,7153737.0,189962270.0,13424615.0,46581788.0,60839012.0,60871780.0,82857896.0,122577400.0,202675490.0,74252344.0,302843100.0,82180260.0,67164050.0,144256700.0,203185580.0,104642210.0,31926436.0,338139200.0,158402830.0,132649490.0,36223340.0,22270606.0,169933820.0,81857280.0,73139064.0,259672930.0,9618092.0,68564080.0,45304148.0,48773236.0,21535702.0,45699004.0,27462012.0,111699080.0,1017591900.0,34205668.0,375507800.0,175735070.0,997363800.0,98687440.0,1299152500.0,135593380.0,27775246.0,142973920.0,74591260.0,226205870.0,387703500.0,555103500.0,80686216.0,71789656.0,31479418.0,38753948.0,28233520.0,59774836.0,38505580.0,111002824.0,103070200.0,26854110.0,56696096.0,27145416.0,68423980.0,18124092.0,97490360.0,122723660.0,153317310.0,229591440.0,117964910.0,115923020.0,860251650.0,26710836.0,};
+int32ptr = (int32_t*)&buffer0[40160];//gradients
+for(int i = 0; i < 384; i++) v12_conv_1_bias[i] -= (int32_t)(int32ptr[i] * blr * v12_conv_1_bias_QAS[i]);
+/* layer 116:TRANSPOSE_CONV_2D */
+transpose_depthwise_conv_kernel5_stride1_inpad2_outpad0_revised_IOHW((float*)&buffer0[34016],4,4,384,v12_conv_1_weight,NULL,(float*)&buffer0[34016],4,4,384,-FLT_MAX,FLT_MAX,(float*)sbuf, &buffer0[40160], 1, 0);
+/* layer 117:WHERE */
+where_zeros_int8_inplace_bit((bool*)&buffer0[32480],6144,(signed char*)&buffer0[34016]);
+/* layer 118:SUM */
+sum_4D_exclude_int8((signed char*)&buffer0[34016],1,4,4,384,3,(int32_t*)&buffer0[32480]);
+/* layer 119:BIAS_UPDATE */
+const float v12_conv_0_bias_QAS[384] = {1136575600.0,2040391300.0,2077056500.0,2034187500.0,1762718600.0,4030772000.0,1841896700.0,4868980000.0,1223189600.0,1855291100.0,1855523200.0,3676532500.0,1970145400.0,2469937000.0,2392775000.0,2519624000.0,2854075400.0,2423968300.0,760267900.0,5027346000.0,4503358500.0,1429835600.0,3663342300.0,1.414174e+19,3816206300.0,1325406200.0,8.8113815e+19,2976416300.0,1733192800.0,1434732300.0,782286460.0,2227346200.0,4872456000.0,3428042800.0,2447028200.0,1980633300.0,2227741000.0,3073567200.0,7238564000.0,4010009600.0,1443874400.0,410462080.0,1775979600.0,2390324000.0,580735600.0,544239170.0,2499269000.0,3330869500.0,2497517600.0,2299572000.0,2718046000.0,1005498300.0,2906264800.0,3471911700.0,4416064500.0,3095418600.0,3148722400.0,8.8113815e+19,3172754400.0,3532102400.0,2870269200.0,1747743600.0,2380882000.0,1762658200.0,3077239000.0,6241826000.0,2263849200.0,3058511400.0,6129932300.0,1897562600.0,8758495000.0,1303848400.0,2934238500.0,2373533000.0,4151177200.0,2698813700.0,3304121300.0,762728960.0,3338361600.0,1505353500.0,1392591500.0,1656505900.0,2924376000.0,4903783000.0,4029962200.0,1769380100.0,3164936700.0,2771395000.0,2660365800.0,2499306200.0,1624377100.0,4389154000.0,1937759700.0,2379855400.0,3833679000.0,1713832400.0,1485755300.0,2333414000.0,3169743000.0,2130247800.0,1956648400.0,2667801300.0,5128366600.0,3131886600.0,2291237000.0,4662625000.0,1979318900.0,1634104600.0,3756548900.0,3228822000.0,3146427600.0,3918374100.0,2717204000.0,2857095200.0,3966231300.0,2318577400.0,5743175700.0,3425646000.0,6293124600.0,2843192800.0,2063824100.0,2927118000.0,1884325900.0,1201014100.0,1751600000.0,4625455600.0,2307460400.0,1284116100.0,3823057200.0,7206434000.0,8.8113815e+19,4447265300.0,4632884700.0,3661992200.0,3819077600.0,2375221200.0,1862547200.0,1889320300.0,3660316700.0,2989126700.0,1493039000.0,1350058500.0,4466152400.0,2041081000.0,2735890000.0,3136133000.0,4380225500.0,2851763700.0,1898354300.0,1009307400.0,3465992700.0,2761323000.0,4866060000.0,1901852300.0,1173971500.0,2203420000.0,2309187000.0,3274329600.0,3855246000.0,1714944400.0,4915921400.0,6548325000.0,4011662800.0,1752499700.0,1874903300.0,3256849000.0,2060328600.0,2163943400.0,1094807300.0,581742200.0,3934632400.0,2134150000.0,1923486600.0,2534842000.0,3439737000.0,1238613200.0,2056313100.0,2582986000.0,8.8113815e+19,1863412100.0,528128540000000.0,8.8113815e+19,2872774700.0,8466160600.0,5928300500.0,2717336300.0,3401440300.0,3856140500.0,3914721800.0,2104371200.0,1990977300.0,3405599700.0,5130124000.0,2366169000.0,3541358800.0,2688096000.0,3265794800.0,1783130000.0,2650924300.0,1261207300.0,4682307600.0,3081187000.0,2707812900.0,2596061000.0,2295762400.0,2629182000.0,3681562400.0,2543694300.0,1627785000.0,2219639600.0,4145208600.0,4756674600.0,2342796000.0,1561126700.0,1436840000.0,2991830500.0,4516881400.0,2437973000.0,1290355200.0,3283809500.0,2447767300.0,2737169000.0,4966438000.0,2080336100.0,1527180200.0,2588113400.0,1862272100.0,3410946000.0,2668299000.0,2924319700.0,2127849600.0,1219165400.0,3750990000.0,3799396600.0,3683312600.0,2547699200.0,6100801500.0,3608704300.0,6309693400.0,1869943200.0,1850927900.0,2413370400.0,3068627000.0,681319400.0,2761030400.0,2762016300.0,2912139000.0,1644817500.0,3241364000.0,2965952500.0,1935296000.0,3653041400.0,2225739800.0,2837288700.0,3625133300.0,2091304400.0,2949881000.0,2271578000.0,3289326300.0,3900763400.0,2080940500.0,1170342400.0,1292553000.0,1089360100.0,1113356700.0,3509231400.0,4747642000.0,1259681200.0,1960991000.0,2714619000.0,3296077600.0,2383403000.0,2179476500.0,4312972000.0,3278589200.0,2652623400.0,2396380200.0,2584977000.0,5060705300.0,3805407700.0,1840800000.0,2255761400.0,763654000.0,3137983500.0,2626940000.0,1784982800.0,1252439800.0,2642950000.0,1560280800.0,3793649200.0,1352926700.0,1214307200.0,2483907600.0,1796537000.0,3180281600.0,2236206000.0,3039899600.0,2374835200.0,1302292200.0,675244740.0,2864737500.0,1171753700.0,1691885000.0,2689620200.0,1480941700.0,4048308200.0,4948261400.0,2745933800.0,3590229500.0,3132125200.0,3124607200.0,1831060900.0,1525987500.0,4083542500.0,4281650700.0,2174200800.0,1382750300.0,2559254800.0,4717650000.0,3676210400.0,2112444000.0,4803199500.0,2491967000.0,1378465300.0,1641825500.0,3807953200.0,3102254800.0,3595002600.0,2529469700.0,3847278800.0,1468933500.0,2812613400.0,1803215900.0,2365023200.0,4257348600.0,4070236000.0,1069724700.0,4381073400.0,4806052000.0,2516518400.0,6788170000.0,3516757500.0,4790797300.0,2993356500.0,2051949200.0,2777829600.0,4020414200.0,2064716800.0,673274200.0,2796632800.0,3958022000.0,1399611300.0,3323319800.0,2259803100.0,2583358700.0,2891336400.0,3667634700.0,1400531000.0,1970075400.0,2867299800.0,1892139800.0,2224057900.0,6168770600.0,2657283000.0,2892859000.0,2627104300.0,2858930700.0,7726923000.0,2281465600.0,1650249900.0,1063661500.0,1463866600.0,5651028500.0,3708549600.0,3168868400.0,812855700.0,1546151200.0,5128070700.0,1893806800.0,2192931800.0,3263515100.0,2940796000.0,1373262100.0,4371444700.0,};
+int32ptr = (int32_t*)&buffer0[32480];//gradients
+for(int i = 0; i < 384; i++) v12_conv_0_bias[i] -= (int32_t)(int32ptr[i] * blr * v12_conv_0_bias_QAS[i]);
+/* layer 120:TRANSPOSE_CONV_2D */
+pointwise_conv_4row4col_IOHW_int8input_int8w((float*)&buffer0[34016],4,4,384,(q7_t*)v12_conv_0_weight,NULL,(float*)&buffer0[32480],4,4,96,-FLT_MAX,FLT_MAX,(float*)sbuf, &buffer0[40160], 1);
+/* layer 121:WHERE */
+where_zeros_int8_inplace_bit((bool*)&buffer0[32288],1536,(signed char*)&buffer0[32480]);
+/* layer 122:SUM */
+sum_4D_exclude_int8((signed char*)&buffer0[32480],1,4,4,96,3,(int32_t*)&buffer0[34016]);
+/* layer 123:BIAS_UPDATE */
+const float v11_conv_2_bias_QAS[96] = {432550300.0,375101700.0,437156060.0,581787100.0,525189470.0,579265300.0,650508200.0,571823600.0,713535500.0,617111200.0,325618500.0,356919550.0,278525500.0,347964160.0,582282900.0,245331860.0,499914270.0,541437300.0,437642700.0,395421700.0,398489000.0,379602430.0,534114940.0,675364740.0,338407420.0,484193920.0,306952420.0,348372770.0,539177300.0,337501440.0,257014050.0,555452100.0,461507170.0,321952800.0,597713600.0,476133950.0,427873060.0,492571620.0,307989630.0,488513340.0,521551070.0,537259500.0,568293000.0,409705540.0,246441150.0,376149150.0,414129730.0,384527500.0,471164220.0,434883870.0,528346430.0,185190740.0,403773700.0,408318600.0,514284540.0,653932000.0,610370600.0,387412000.0,360227840.0,478465060.0,668778430.0,619559300.0,407304800.0,381928700.0,433998000.0,531015840.0,637770800.0,597956100.0,795642300.0,328686560.0,419181920.0,547983600.0,508011330.0,242219650.0,477589950.0,317062080.0,421132260.0,442602600.0,452089120.0,376861700.0,706227400.0,490516320.0,308305180.0,422310750.0,427676000.0,388494500.0,391234880.0,488454620.0,536344900.0,764594750.0,466583170.0,355003200.0,361732580.0,373656800.0,524078200.0,281078370.0,};
+int32ptr = (int32_t*)&buffer0[34016];//gradients
+for(int i = 0; i < 96; i++) v11_conv_2_bias[i] -= (int32_t)(int32ptr[i] * blr * v11_conv_2_bias_QAS[i]);
+/* layer 124:TRANSPOSE_CONV_2D */
+pointwise_conv_4row4col_IOHW_int8input_int8w((float*)&buffer0[32480],4,4,96,(q7_t*)v11_conv_2_weight,NULL,(float*)&buffer0[47168],4,4,240,-FLT_MAX,FLT_MAX,(float*)sbuf, &buffer0[51008], 1);
+/* layer 125:WHERE */
+where_zeros_int8_inplace_bit((bool*)&buffer0[31808],3840,(signed char*)&buffer0[47168]);
+/* layer 126:SUM */
+sum_4D_exclude_int8((signed char*)&buffer0[47168],1,4,4,240,3,(int32_t*)&buffer0[31808]);
+/* layer 127:BIAS_UPDATE */
+const float v11_conv_1_bias_QAS[240] = {176854110.0,147088780.0,98894730.0,154173280.0,120978744.0,110749630.0,85150220.0,87416744.0,76360824.0,182378500.0,84360850.0,110915370.0,372390370.0,119287890.0,180645870.0,792535200.0,96971060.0,93952740.0,120224230.0,333828200.0,107680370.0,252133620.0,200577920.0,93724936.0,140804700.0,165764480.0,124706240.0,175792910.0,117854070.0,114314376.0,33995524.0,84359820.0,85569940.0,340773100.0,89224950.0,82249224.0,116825580.0,93757290.0,101293930.0,86161970.0,126940500.0,103337390.0,84285220.0,245931570.0,111383970.0,153373120.0,143879070.0,67805640.0,100072390.0,77325030.0,144503660.0,116583420.0,235600800.0,751139800.0,466777400.0,113541370.0,122336530.0,348951500.0,104526360.0,63396948.0,57517988.0,140818690.0,95306520.0,81721170.0,117096000.0,322184030.0,100322950.0,93083250.0,56282944.0,82163250.0,107621480.0,153793470.0,78120830.0,166910620.0,201587620.0,105373780.0,110673730.0,45338730.0,131914070.0,1906639100.0,158487740.0,112157760.0,125367740.0,136941630.0,95518184.0,227501840.0,64020650.0,151728160.0,81904936.0,93160216.0,99449350.0,125387304.0,332069980.0,84223860.0,135165070.0,145589760.0,89583630.0,100572030.0,100823280.0,84184250.0,60865700.0,90351120.0,362819700.0,87650880.0,87846640.0,56651360.0,107920850.0,76796216.0,110930990.0,514935460.0,103876504.0,93186580.0,116479710.0,300237280.0,46850948.0,143543410.0,122639730.0,126919660.0,133438990.0,328854370.0,127010170.0,78943870.0,275756670.0,108456770.0,251999470.0,224582880.0,65074616.0,104979590.0,122542310.0,103600230.0,101624230.0,114799900.0,247452210.0,137358100.0,125727200.0,138057550.0,104491070.0,70584660.0,77253380.0,112826780.0,120639590.0,128703840.0,93863544.0,159654450.0,141452350.0,274409950.0,102693560.0,226816100.0,214489520.0,84627384.0,63941132.0,83276696.0,59306416.0,95793350.0,97138530.0,109930670.0,81163130.0,71914344.0,129095450.0,94769256.0,57460800.0,100512170.0,70987496.0,85093360.0,86233260.0,99843176.0,101501390.0,143300300.0,64805096.0,122478130.0,22592322.0,70645440.0,330577060.0,173949550.0,89555320.0,114850640.0,64686964.0,75196870.0,122780230.0,105577896.0,108401380.0,79986860.0,124280240.0,143060580.0,176160100.0,166410270.0,100347416.0,118310856.0,140926720.0,352116500.0,320394880.0,686043700.0,155510910.0,94487490.0,81552350.0,130098490.0,103792170.0,35842748.0,232687410.0,45229960.0,192181660.0,122861816.0,107111960.0,363504320.0,111834100.0,122364530.0,153787380.0,113546840.0,113141250.0,320554050.0,378002940.0,80382440.0,153116420.0,70618480.0,157710820.0,102684430.0,108095380.0,137134880.0,117507750.0,152732460.0,102970370.0,92666184.0,694961400.0,86364936.0,107402696.0,97384520.0,150793780.0,92713144.0,130695256.0,85760200.0,89749550.0,6196774000.0,68428830.0,84317520.0,197643500.0,48946260.0,109050030.0,126658664.0,113251020.0,115429760.0,};
+int32ptr = (int32_t*)&buffer0[31808];//gradients
+for(int i = 0; i < 240; i++) v11_conv_1_bias[i] -= (int32_t)(int32ptr[i] * blr * v11_conv_1_bias_QAS[i]);
+/* layer 128:TRANSPOSE_CONV_2D */
+transpose_depthwise_conv_kernel7_stride2_inpad3_outpad1_revised_IOHW((float*)&buffer0[47168],4,4,240,v11_conv_1_weight,NULL,(float*)&buffer0[31808],8,8,240,-FLT_MAX,FLT_MAX,(float*)sbuf, &buffer0[51008], 1, 0);
+/* layer 129:WHERE */
+where_zeros_int8_inplace_bit((bool*)&buffer0[29888],15360,(signed char*)&buffer0[31808]);
+/* layer 130:SUM */
+sum_4D_exclude_int8((signed char*)&buffer0[31808],1,8,8,240,3,(int32_t*)&buffer0[29888]);
+/* layer 131:BIAS_UPDATE */
+const float v11_conv_0_bias_QAS[240] = {222053550.0,238249230.0,42329590.0,334853570.0,244787970.0,187087220.0,252697920.0,214233280.0,244313620.0,216889570.0,550981060.0,157574820.0,376055800.0,169615070.0,633696800.0,183249020.0,173189730.0,156033260.0,451611300.0,717515900.0,233444640.0,120407730.0,264770880.0,210556210.0,277143550.0,222676300.0,467064580.0,260657680.0,515243970.0,334925600.0,63610550.0,191211940.0,322718080.0,282833630.0,356672160.0,503605920.0,379796740.0,264762100.0,303439940.0,168188670.0,946538050.0,246090620.0,255942770.0,433751040.0,194935890.0,447735900.0,335057900.0,190451890.0,175017390.0,594128300.0,278718900.0,202936320.0,161872020.0,109231010.0,375647140.0,2194942000.0,167079700.0,406403970.0,374617540.0,128290840.0,197049180.0,291071870.0,299988450.0,232603550.0,395654620.0,496277120.0,183359900.0,287347700.0,190623520.0,342361060.0,107304770.0,225165010.0,234340910.0,1113314000.0,311237950.0,260575700.0,60788068.0,124534180.0,174860020.0,273796320.0,188689420.0,186112640.0,293580060.0,251349010.0,150670850.0,150847970.0,101516240.0,415562530.0,248355820.0,239681020.0,69158320.0,365116900.0,238008820.0,178186620.0,114276780.0,291710270.0,389046300.0,236874450.0,209619100.0,481769150.0,100649240.0,323922140.0,363505920.0,345436540.0,238355440.0,138547300.0,191461700.0,290883040.0,353903780.0,409517400.0,357018530.0,107448344.0,154399970.0,300423330.0,114199710.0,317265540.0,140985090.0,361069100.0,85341464.0,728871900.0,517906530.0,160144880.0,479543970.0,195112770.0,558428000.0,401075230.0,132034840.0,148002030.0,344508220.0,212592830.0,369757500.0,214354340.0,362561020.0,292036860.0,364706600.0,459363970.0,376638620.0,179853820.0,198257420.0,139451140.0,270904420.0,394561800.0,298892900.0,188446560.0,259890580.0,296260860.0,441818560.0,61723972.0,182898480.0,128629410.0,154542020.0,192442610.0,274891940.0,531862140.0,261821000.0,178555650.0,185288380.0,134832880.0,558778940.0,760331140.0,188252060.0,215739570.0,250051870.0,439624130.0,283744030.0,223087940.0,224839870.0,184522850.0,232627410.0,375074600.0,129570296.0,232125470.0,409374340.0,278790460.0,222788240.0,294334460.0,168461860.0,196347580.0,122758456.0,174988850.0,338849120.0,203318580.0,219040940.0,249616060.0,254826530.0,123540730.0,148026110.0,222169070.0,322438340.0,318081180.0,279756450.0,249204690.0,263394930.0,277079500.0,286754080.0,316824350.0,151333900.0,1401044400.0,654861760.0,338289120.0,567904900.0,119817010.0,251501280.0,306107400.0,381583300.0,534466880.0,326682370.0,499156540.0,255604020.0,223444800.0,218008660.0,210210370.0,267794180.0,457032100.0,227650420.0,445688830.0,86923090.0,234123620.0,548293760.0,258038320.0,223319740.0,195635200.0,733549900.0,109024990.0,303095500.0,379993820.0,211956530.0,252265330.0,408614100.0,392735700.0,242124930.0,1553785600.0,112253300.0,136019570.0,504035550.0,114972200.0,270072700.0,426348930.0,303208580.0,214769120.0,};
+int32ptr = (int32_t*)&buffer0[29888];//gradients
+for(int i = 0; i < 240; i++) v11_conv_0_bias[i] -= (int32_t)(int32ptr[i] * blr * v11_conv_0_bias_QAS[i]);
+/* layer 132:TRANSPOSE_CONV_2D */
+pointwise_conv_4row4col_IOHW_int8input_int8w((float*)&buffer0[31808],8,8,240,(q7_t*)v11_conv_0_weight,NULL,(float*)&buffer0[47168],8,8,48,-FLT_MAX,FLT_MAX,(float*)sbuf, &buffer0[50240], 1);
+/* layer 133:WHERE */
+where_zeros_int8_inplace_bit((bool*)&buffer0[26816],3072,(signed char*)&buffer0[47168]);
+/* layer 134:CAST */
+fptr = (float*)&buffer0[50240];
+int8ptr = (int8_t*)&buffer0[47168];
+for(int i = 0; i < 3072; i++) fptr[i] = (float)int8ptr[i];
+/* layer 135:DIV */
+fptr3 = (float*)&buffer0[62528]; fptr2 = (float*)&buffer0[50240];
+for(int i = 0; i < 3072; i++) *fptr3++ = *fptr2++ / 0.054952241480350494;
+/* layer 136:MUL */
+fptr = (float*)&buffer0[62528];fptr3 = (float*)&buffer0[50240];for(int i = 0; i < 3072; i++) fptr3[i] = 0.0381767563521862 * fptr[i];
+/* layer 137:CAST */
+int8ptr = (int8_t*)&buffer0[47168];
+fptr = (float*)&buffer0[50240];
+for(int i = 0; i < 3072; i++) int8ptr[i] = (int8_t)fptr[i];
+/* layer 138:WHERE */
+where_zeros_int8_inplace_bit((bool*)&buffer0[26432],3072,(signed char*)&buffer0[47168]);
+/* layer 139:SUM */
+sum_4D_exclude_int8((signed char*)&buffer0[47168],1,8,8,48,3,(int32_t*)&buffer0[26432]);
+/* layer 140:BIAS_UPDATE */
+const float v10_conv_2_bias_QAS[48] = {576984500.0,389407400.0,59698172.0,257143000.0,163044690.0,395011680.0,497028600.0,342989300.0,379091260.0,276234370.0,121533540.0,131055270.0,55527044.0,83971040.0,51497524.0,200109470.0,186422500.0,71635896.0,512487360.0,66350476.0,412828100.0,127238440.0,75970530.0,729505400.0,290650850.0,356379070.0,305478050.0,364946430.0,79329816.0,28634610.0,304265300.0,137598180.0,449954780.0,41008460.0,66146290.0,151813570.0,632065300.0,296810370.0,201276270.0,138420270.0,258529490.0,316172670.0,228946190.0,59856908.0,421134560.0,118707160.0,213282690.0,46290260.0,};
+int32ptr = (int32_t*)&buffer0[26432];//gradients
+for(int i = 0; i < 48; i++) v10_conv_2_bias[i] -= (int32_t)(int32ptr[i] * blr * v10_conv_2_bias_QAS[i]);
+/* layer 141:GROUP_CONV */
+const float v11_conv_0_weight_QAS[240] = {670546.0,719452.8,127824.73,1011173.6,739198.1,564956.4,763084.2,646930.75,737765.94,654952.06,1663824.4,475836.38,1135594.0,512194.9,1913605.2,553366.06,522989.47,471181.28,1363752.8,2166717.8,704944.2,363601.1,799541.56,635826.94,836904.0,672426.6,1410417.8,787120.8,1555907.4,1011391.1,192087.9,577412.06,974527.6,854086.44,1077060.4,1520763.4,1146890.6,799515.06,916312.5,507887.53,2858307.5,743131.9,772882.94,1309819.2,588657.44,1352049.9,1011790.5,575116.75,528508.56,1794118.4,841661.06,612816.75,488812.84,329850.2,1134360.0,6628174.0,504538.7,1227237.9,1131250.9,387406.12,595039.0,878963.94,905889.8,702404.3,1194777.6,1498632.2,553700.9,867717.94,575635.1,1033844.3,324033.44,679941.75,707650.7,3361929.0,939860.4,786873.25,183564.7,376061.94,528033.4,826796.06,569794.7,562013.44,886537.94,759010.9,454988.1,455522.97,306553.56,1254894.5,749972.2,723776.44,208840.78,1102561.2,718726.9,538078.8,345087.2,880891.7,1174822.0,715301.3,632997.0,1454821.9,303935.44,978163.5,1097696.6,1043131.56,719773.56,418378.0,578166.2,878393.6,1068700.5,1236639.6,1078106.2,324467.0,466249.2,907203.0,344854.44,958062.25,425739.53,1090337.9,257709.8,2201009.8,1563947.8,483597.34,1448102.4,589191.56,1686312.6,1211146.5,398712.06,446928.97,1040328.25,641976.94,1116574.9,647296.3,1094843.2,881877.94,1101322.4,1387163.8,1137354.1,543113.3,598687.6,421107.44,818063.3,1191477.5,902581.56,569061.4,784804.25,894633.44,1334181.1,186390.89,552307.44,388428.53,466678.06,581128.4,830104.6,1606090.1,790633.6,539193.25,559524.44,407161.47,1687372.0,2296009.0,568473.94,651479.4,755093.94,1327554.4,856835.8,673669.5,678960.0,557212.7,702476.4,1132631.0,391269.75,700960.6,1236207.8,841877.2,672764.5,888816.2,508712.5,592920.44,370699.66,528422.4,1023239.4,613971.06,661448.6,753777.9,769512.06,373061.97,447001.66,670894.75,973682.8,960525.2,844794.25,752535.56,795386.56,836710.44,865925.25,956729.94,456990.38,4230802.0,1977518.0,1021548.2,1714930.2,361817.28,759470.7,924367.44,1152285.9,1613955.8,986498.7,1507327.5,771859.8,674747.2,658331.4,634782.5,808671.2,1380122.1,687447.0,1345868.2,262485.9,706994.56,1655709.5,779210.94,674369.5,590769.1,2215136.5,329228.1,915272.25,1147485.9,640055.5,761777.9,1233912.0,1185963.1,731156.44,4692042.5,338976.75,410744.97,1522060.9,347187.2,815551.8,1287466.9,915613.8,648548.7,};
+group_conv_kernel8_stride1_pad0_in8x8_out1x1_uniweight_4row16col_int8input_int8weight_inplace_revised((float*)&buffer0[23360],8,8,48,weight_fp59,NULL,v11_conv_0_weight,1,1,11520,-FLT_MAX,FLT_MAX,(float*)sbuf, &buffer0[26432], 1, 48, v11_conv_0_weight_QAS, lr);
+/* layer 142:TRANSPOSE_CONV_2D */
+pointwise_conv_4row4col_IOHW_int8input_int8w((float*)&buffer0[47168],8,8,48,(q7_t*)v10_conv_2_weight,NULL,(float*)&buffer0[23360],8,8,192,-FLT_MAX,FLT_MAX,(float*)sbuf, &buffer0[50240], 1);
+/* layer 143:WHERE */
+where_zeros_int8_inplace_bit((bool*)&buffer0[21824],12288,(signed char*)&buffer0[23360]);
+/* layer 144:SUM */
+sum_4D_exclude_int8((signed char*)&buffer0[23360],1,8,8,192,3,(int32_t*)&buffer0[21824]);
+/* layer 145:BIAS_UPDATE */
+const float v10_conv_1_bias_QAS[192] = {91498020.0,21703900.0,74548910.0,20367418.0,50317540.0,26126268.0,31789870.0,77352670.0,330807140.0,43109310.0,150408320.0,100646870.0,15095056.0,16704816.0,101405064.0,40953732.0,50770456.0,849581600.0,138668300.0,95600460.0,58561360.0,34244264.0,76390696.0,74299656.0,26127668.0,75969860.0,37016710.0,57564930.0,38139796.0,59333450.0,41273180.0,539932400.0,27564568.0,44924940.0,141521250.0,525426720.0,24957830.0,44320736.0,52234388.0,128723410.0,54619016.0,95084080.0,59555890.0,10127654.0,49914844.0,35753790.0,25564582.0,7.926462e+20,71134616.0,219250260.0,20063882.0,23685664.0,19783332.0,41921616.0,147659570.0,325859620.0,26529076.0,93842320.0,31472068.0,319382270.0,19002686.0,13319471.0,39225170.0,100210230.0,24215364.0,41917136.0,95148664.0,94530310.0,488316830.0,281061600.0,35070600.0,286875360.0,7.926462e+20,102254584.0,26417842.0,139680050.0,113340260.0,258821170.0,43446600.0,110207010.0,228261840.0,97286390.0,33967580.0,3.3137846e+18,96405100.0,225125940.0,23332618.0,37959870.0,17261586.0,414961470.0,46180284.0,64573024.0,34286850.0,96981620.0,674039500.0,18024324.0,98657020.0,76273630.0,99349336.0,26751442.0,35259310.0,30420076.0,43048730.0,190223440.0,61141180.0,22132840.0,7.926462e+20,14033916.0,54909504.0,1.2152945e+19,60782644.0,153244180.0,214885660.0,95203530.0,28061244.0,62447444.0,64206444.0,175626880.0,81514450.0,45761340.0,68010504.0,85956600.0,48007340.0,87339700.0,20565010.0,87345360.0,384014600.0,41866216.0,24324360.0,310756640.0,35422428.0,190334430.0,14539075.0,279499500.0,183014900.0,91942710.0,30690068.0,50796080.0,45597960.0,62931570.0,80521384.0,72409110.0,160230800.0,7.926462e+20,16303242.0,80481736.0,186633810.0,114596830.0,106177800.0,345116030.0,54160856.0,72475890.0,94240830.0,58295276.0,150437180.0,17037896.0,20385790.0,42254908.0,24926226.0,53126660.0,64769964.0,75218770.0,83778950.0,110935520.0,97568930.0,15854546.0,66931852.0,22687206.0,1226601700.0,52244000.0,14805831.0,591243970.0,98504376.0,90397460.0,34641444.0,42985644.0,126322130.0,31645788.0,465370240.0,7.926462e+20,55217080.0,63158904.0,236222200.0,29223000.0,66637012.0,68148130.0,44197010.0,70664260.0,30163060.0,146203980.0,15988247.0,73750160.0,};
+int32ptr = (int32_t*)&buffer0[21824];//gradients
+for(int i = 0; i < 192; i++) v10_conv_1_bias[i] -= (int32_t)(int32ptr[i] * blr * v10_conv_1_bias_QAS[i]);
+/* layer 146:TRANSPOSE_CONV_2D */
+transpose_depthwise_conv_kernel3_stride1_inpad1_outpad0_revised_IOHW((float*)&buffer0[23360],8,8,192,v10_conv_1_weight,NULL,(float*)&buffer0[23360],8,8,192,-FLT_MAX,FLT_MAX,(float*)sbuf, &buffer0[35648], 1, 0);
+/* layer 147:WHERE */
+where_zeros_int8_inplace_bit((bool*)&buffer0[20288],12288,(signed char*)&buffer0[23360]);
+/* layer 148:SUM */
+sum_4D_exclude_int8((signed char*)&buffer0[23360],1,8,8,192,3,(int32_t*)&buffer0[20288]);
+/* layer 149:BIAS_UPDATE */
+const float v10_conv_0_bias_QAS[192] = {1475223700.0,1030703360.0,816994900.0,512779230.0,2347524000.0,660836200.0,531277100.0,1150393100.0,1093105800.0,930657660.0,1174644100.0,1569000400.0,614608400.0,238872670.0,687180860.0,1450896600.0,1165788900.0,631683600.0,331118600.0,2059191600.0,576453700.0,1783982700.0,1080919000.0,1134233300.0,1000822700.0,706217660.0,2038128300.0,877797100.0,420611420.0,540037000.0,1291300400.0,1069388500.0,3233160200.0,1426606800.0,1734019000.0,793607800.0,1705975700.0,820450200.0,1467972600.0,1563580800.0,1639382700.0,1207545900.0,527852260.0,1098293100.0,1192724600.0,427076130.0,1026932500.0,4.2190073e+19,2782907000.0,379147230.0,747813440.0,2024572700.0,732507460.0,3235556400.0,1616138000.0,647234370.0,501706100.0,1485312600.0,93479270.0,855545300.0,662285060.0,689683200.0,1878082300.0,391809820.0,1131090600.0,1391837400.0,1121582500.0,1456275000.0,1049894140.0,898902800.0,647960100.0,1042980860.0,4.2190073e+19,1154471300.0,944551500.0,1879237600.0,1525937700.0,1369606500.0,723569400.0,1031477060.0,1823601200.0,334616930.0,508839520.0,1.0062653e+19,3225643000.0,1678289000.0,1146084500.0,1116367900.0,1023416960.0,240773890.0,851186600.0,768675300.0,2167447800.0,319047840.0,1249289700.0,1149507500.0,761708900.0,713539840.0,400350180.0,2352317400.0,1594127900.0,4629730000.0,1047818050.0,1866290800.0,1265541600.0,773695740.0,4.2190073e+19,2732557800.0,1945134000.0,9.496834e+18,1106979300.0,171058960.0,950375230.0,1286682500.0,727137600.0,1664550100.0,1629387900.0,1219778400.0,494477500.0,854450750.0,930129700.0,981427000.0,989852160.0,1155484500.0,453677760.0,651104640.0,673504200.0,1487471100.0,1002485300.0,1187815000.0,1635459100.0,1182514200.0,854215230.0,968733600.0,679369500.0,3393553000.0,1513275100.0,2469444900.0,983279400.0,183170540.0,638984400.0,1627245000.0,149853440.0,4.2190073e+19,780821600.0,1578438500.0,1005550300.0,387958200.0,818162500.0,616344400.0,685506200.0,519065180.0,682904450.0,1482624500.0,1451357200.0,891735040.0,472708900.0,1093981600.0,1768975600.0,1353452900.0,2043813400.0,1133310100.0,903940000.0,1340711300.0,77990610.0,464214430.0,2339695000.0,1046356900.0,830976640.0,822072200.0,869157760.0,722591300.0,661153200.0,636663740.0,1315949400.0,1828656500.0,565251140.0,628219800.0,1262477200.0,4.2190073e+19,993717060.0,2325293000.0,1867443300.0,155855520.0,1347042400.0,4613281000.0,1599269500.0,758371700.0,1108067000.0,1495697800.0,671200600.0,378001060.0,};
+int32ptr = (int32_t*)&buffer0[20288];//gradients
+for(int i = 0; i < 192; i++) v10_conv_0_bias[i] -= (int32_t)(int32ptr[i] * blr * v10_conv_0_bias_QAS[i]);
+/* layer 150:TRANSPOSE_CONV_2D */
+pointwise_conv_4row4col_IOHW_int8input_int8w((float*)&buffer0[23360],8,8,192,(q7_t*)v10_conv_0_weight,NULL,(float*)&buffer0[20288],8,8,48,-FLT_MAX,FLT_MAX,(float*)sbuf, &buffer0[35648], 1);
+/* layer 151:WHERE */
+where_zeros_int8_inplace_bit((bool*)&buffer0[17216],3072,(signed char*)&buffer0[20288]);
+/* layer 152:CAST */
+fptr = (float*)&buffer0[35648];
+int8ptr = (int8_t*)&buffer0[20288];
+for(int i = 0; i < 3072; i++) fptr[i] = (float)int8ptr[i];
+/* layer 153:DIV */
+fptr3 = (float*)&buffer0[47936]; fptr2 = (float*)&buffer0[35648];
+for(int i = 0; i < 3072; i++) *fptr3++ = *fptr2++ / 0.03910466656088829;
+/* layer 154:MUL */
+fptr = (float*)&buffer0[47936];fptr3 = (float*)&buffer0[60224];for(int i = 0; i < 3072; i++) fptr3[i] = 0.027072276920080185 * fptr[i];
+/* layer 155:CAST */
+int8ptr = (int8_t*)&buffer0[35648];
+fptr = (float*)&buffer0[60224];
+for(int i = 0; i < 3072; i++) int8ptr[i] = (int8_t)fptr[i];
+/* layer 156:WHERE */
+where_zeros_int8_inplace_bit((bool*)&buffer0[16832],3072,(signed char*)&buffer0[35648]);
+/* layer 157:SUM */
+sum_4D_exclude_int8((signed char*)&buffer0[35648],1,8,8,48,3,(int32_t*)&buffer0[16832]);
+/* layer 158:BIAS_UPDATE */
+const float v9_conv_2_bias_QAS[48] = {467422080.0,906110300.0,82031630.0,386175900.0,249515620.0,371799900.0,425080700.0,675390660.0,224327490.0,402949300.0,109860504.0,97970264.0,85090110.0,262435360.0,86668800.0,151615570.0,437346000.0,219043950.0,263517820.0,68615010.0,533205400.0,122905176.0,102954950.0,404755840.0,390545180.0,400670660.0,408666100.0,411500480.0,175263620.0,26112552.0,305699200.0,187931660.0,501943400.0,65524750.0,89183896.0,138039250.0,543368060.0,315859260.0,501618660.0,135876560.0,551759040.0,556720200.0,591731840.0,105087570.0,467634000.0,163005580.0,555435100.0,121024410.0,};
+int32ptr = (int32_t*)&buffer0[16832];//gradients
+for(int i = 0; i < 48; i++) v9_conv_2_bias[i] -= (int32_t)(int32ptr[i] * blr * v9_conv_2_bias_QAS[i]);
+/* layer 159:GROUP_CONV */
+const float v10_conv_0_weight_QAS[192] = {2255875.2,1576125.8,1249328.0,784129.2,3589775.5,1010534.2,812415.56,1759152.5,1671550.0,1423138.5,1796236.4,2399276.0,939843.6,365278.12,1050819.8,2218675.0,1782695.5,965954.6,506338.25,3148864.5,881498.6,2728021.8,1652914.4,1734441.2,1530433.0,1079930.4,3116655.0,1342305.5,643188.44,825810.94,1974624.0,1635282.0,4944067.5,2181531.2,2651618.2,1213565.1,2608735.5,1254611.9,2244787.0,2390988.5,2506902.8,1846548.9,807178.56,1679482.1,1823884.4,653074.1,1570359.5,6.4516005e+16,4255552.0,579782.44,1143537.6,3095926.0,1120132.0,4947732.0,2471357.5,989734.5,767196.4,2271302.8,142946.16,1308278.5,1012749.75,1054646.4,2871916.5,599145.7,1729635.5,2128362.8,1715095.8,2226899.2,1605471.9,1374579.6,990844.4,1594900.4,6.4516005e+16,1765388.9,1444384.5,2873683.2,2333425.8,2094367.8,1106464.2,1577309.0,2788605.0,511687.84,778104.7,1.5387559e+16,4932572.5,2566397.5,1752563.8,1707121.8,1564983.6,368185.4,1301613.4,1175439.1,3314407.0,487880.0,1910382.6,1757798.1,1164786.2,1091127.1,612205.44,3597104.8,2437700.2,7079667.5,1602297.1,2853885.2,1935234.8,1183116.1,6.4516005e+16,4178559.2,2974450.2,1.452232e+16,1692765.0,261579.1,1453290.1,1967562.6,1111920.5,2545388.2,2491619.0,1865254.4,756142.56,1306604.8,1422331.1,1500773.5,1513657.1,1766937.9,693752.75,995652.94,1029905.8,2274603.5,1532975.5,1816376.9,2500903.2,1808271.2,1306244.5,1481363.0,1038874.8,5189336.0,2314062.5,3776212.8,1503606.1,280099.8,977118.8,2488342.5,229152.12,6.4516005e+16,1194013.0,2413708.5,1537662.2,593255.94,1251113.6,942498.44,1048258.9,793741.5,1044280.3,2267192.2,2219379.0,1363619.0,722854.56,1672889.1,2705073.0,2069666.2,3125348.5,1733029.6,1382282.2,2050182.1,119261.28,709865.0,3577803.2,1600062.8,1270708.8,1257092.1,1329094.2,1104968.5,1011018.8,973570.3,2012316.8,2796335.8,864368.0,960657.8,1930548.4,6.4516005e+16,1519567.2,3555780.0,2855647.8,238330.36,2059863.2,7054513.5,2445563.0,1159683.0,1694428.2,2287183.5,1026383.1,578029.75,};
+group_conv_kernel8_stride1_pad0_in8x8_out1x1_uniweight_4row16col_int8input_int8weight_inplace_revised((float*)&buffer0[13760],8,8,48,weight_fp63,NULL,v10_conv_0_weight,1,1,9216,-FLT_MAX,FLT_MAX,(float*)sbuf, &buffer0[16832], 1, 48, v10_conv_0_weight_QAS, lr);
+/* layer 160:TRANSPOSE_CONV_2D */
+pointwise_conv_4row4col_IOHW_int8input_int8w((float*)&buffer0[35648],8,8,48,(q7_t*)v9_conv_2_weight,NULL,(float*)&buffer0[13760],8,8,144,-FLT_MAX,FLT_MAX,(float*)sbuf, &buffer0[22976], 1);
+/* layer 161:WHERE */
+where_zeros_int8_inplace_bit((bool*)&buffer0[12608],9216,(signed char*)&buffer0[13760]);
+/* layer 162:SUM */
+sum_4D_exclude_int8((signed char*)&buffer0[13760],1,8,8,144,3,(int32_t*)&buffer0[12608]);
+/* layer 163:BIAS_UPDATE */
+const float v9_conv_1_bias_QAS[144] = {54733956.0,173848220.0,45967984.0,126531840.0,79768470.0,53002120.0,27056624.0,60511692.0,133232910.0,52591820.0,23713302.0,243218420.0,22146126.0,116369490.0,22752058.0,17828302.0,97626120.0,346548600.0,23582536.0,252146660.0,238443440.0,19840076.0,572430300.0,110761224.0,51954850.0,334852130.0,112444800.0,94147880.0,155927550.0,68164310.0,26532762.0,96081256.0,111518630.0,55589960.0,51408240.0,24390004.0,140507840.0,34851656.0,233304720.0,57837670.0,61995772.0,38087830.0,69655540.0,42229236.0,44804470.0,340878080.0,308601570.0,32050590.0,92793220.0,9848095.0,283077800.0,15825534.0,258542540.0,66199556.0,5.5373517e+20,32202730.0,70831980.0,113073910.0,23426098.0,1714624.6,166929950.0,112203640.0,66385076.0,239498160.0,20507924.0,16852454.0,352472740.0,209239580.0,31675186.0,16464575.0,25834670.0,72434936.0,33462174.0,229740400.0,38104464.0,270421630.0,46964056.0,25496292.0,232958240.0,203855060.0,19192378.0,1206516900.0,67821540.0,226746670.0,38211356.0,14218684.0,38653424.0,148065630.0,101594664.0,47311370.0,14660140.0,61906380.0,20851062.0,969217200.0,185440430.0,12016323.0,261744140.0,31165548.0,453362530.0,252500340.0,11567396.0,41422756.0,40687388.0,35611936.0,16170318.0,41552930.0,123760720.0,157315200.0,52242944.0,86846910.0,22653770.0,202114220.0,301359940.0,168026030.0,60349610.0,238831660.0,16336067.0,45832524.0,199273950.0,264016270.0,24149638.0,186845980.0,196863360.0,63264904.0,83816350.0,195107700.0,195357070.0,23637384.0,38084650.0,42718620.0,13965792.0,11136773.0,70307080.0,81381490.0,31760066.0,36261950.0,89230140.0,23538300.0,465251100.0,23585384.0,151535980.0,100698000.0,153223950.0,22549854.0,};
+int32ptr = (int32_t*)&buffer0[12608];//gradients
+for(int i = 0; i < 144; i++) v9_conv_1_bias[i] -= (int32_t)(int32ptr[i] * blr * v9_conv_1_bias_QAS[i]);
+/* layer 164:TRANSPOSE_CONV_2D */
+transpose_depthwise_conv_kernel3_stride1_inpad1_outpad0_revised_IOHW((float*)&buffer0[13760],8,8,144,v9_conv_1_weight,NULL,(float*)&buffer0[13760],8,8,144,-FLT_MAX,FLT_MAX,(float*)sbuf, &buffer0[22976], 1, 0);
+/* layer 165:WHERE */
+where_zeros_int8_inplace_bit((bool*)&buffer0[11456],9216,(signed char*)&buffer0[13760]);
+/* layer 166:SUM */
+sum_4D_exclude_int8((signed char*)&buffer0[13760],1,8,8,144,3,(int32_t*)&buffer0[11456]);
+/* layer 167:BIAS_UPDATE */
+const float v9_conv_0_bias_QAS[144] = {852220540.0,924375360.0,1224374300.0,644542700.0,936913900.0,642362500.0,752038500.0,2478320600.0,591012700.0,1420872800.0,1467748200.0,1267579900.0,1201380600.0,822313860.0,1657994100.0,1281687300.0,1004208300.0,888644300.0,1197253900.0,1327166500.0,610892300.0,2114835700.0,1555972900.0,1024112960.0,1028692350.0,482174300.0,401786430.0,587585000.0,237098750.0,1290291600.0,1407533800.0,904460200.0,719896640.0,1445117400.0,1099168600.0,764090000.0,999069200.0,969456100.0,1392124000.0,520202430.0,715481900.0,1880075600.0,1313654500.0,1183720200.0,590511600.0,317668100.0,498569600.0,622813100.0,783516600.0,558696200.0,804609500.0,1353362000.0,694475800.0,891263700.0,5.4547726e+19,1856706400.0,456388670.0,225544260.0,319649920.0,807483000.0,777442700.0,891791300.0,1552675800.0,753179100.0,353785500.0,595058600.0,387562560.0,941138750.0,1109761500.0,1540620300.0,818860800.0,237001300.0,770516200.0,1243588200.0,826524100.0,540467100.0,1037076860.0,1355780400.0,1282261000.0,1109464600.0,1227879800.0,218033940.0,1266410500.0,1232285000.0,481644830.0,385651840.0,413922100.0,961494850.0,674703170.0,1210070900.0,858774200.0,518209380.0,2374035700.0,858949300.0,814067100.0,2049135000.0,545253060.0,1780161900.0,1056487740.0,673625860.0,460882500.0,660758000.0,1113948700.0,1040494800.0,673070460.0,1957374200.0,1697148700.0,859047700.0,3588628200.0,2130695600.0,402939840.0,1072150200.0,1303001500.0,1274725800.0,709652540.0,1075671600.0,1084890900.0,934434240.0,1195866100.0,690687800.0,1962665600.0,1149564500.0,620770200.0,892396350.0,1285760800.0,927599940.0,902138600.0,379901900.0,740688500.0,1154740200.0,513176350.0,1065783600.0,1793318800.0,2540098300.0,3273737500.0,1108104100.0,827858500.0,2157512400.0,1211117400.0,971802500.0,996423900.0,990253250.0,765563140.0,373902200.0,};
+int32ptr = (int32_t*)&buffer0[11456];//gradients
+for(int i = 0; i < 144; i++) v9_conv_0_bias[i] -= (int32_t)(int32ptr[i] * blr * v9_conv_0_bias_QAS[i]);
+/* layer 168:TRANSPOSE_CONV_2D */
+pointwise_conv_4row4col_IOHW_int8input_int8w((float*)&buffer0[13760],8,8,144,(q7_t*)v9_conv_0_weight,NULL,(float*)&buffer0[22976],8,8,48,-FLT_MAX,FLT_MAX,(float*)sbuf, &buffer0[26048], 1);
+/* layer 169:WHERE */
+where_zeros_int8_inplace_bit((bool*)&buffer0[11072],3072,(signed char*)&buffer0[22976]);
+/* layer 170:SUM */
+sum_4D_exclude_int8((signed char*)&buffer0[22976],1,8,8,48,3,(int32_t*)&buffer0[11072]);
+/* layer 171:BIAS_UPDATE */
+const float v8_conv_2_bias_QAS[48] = {284621660.0,304217000.0,503038000.0,391473180.0,252154510.0,297123100.0,263391630.0,310499800.0,359126900.0,420800000.0,206491170.0,458631100.0,271088160.0,370546300.0,407529000.0,202315120.0,325050460.0,376422430.0,507360160.0,376447260.0,466791140.0,383453700.0,443895200.0,274529820.0,177055120.0,257525200.0,318709300.0,191143300.0,346373630.0,294000900.0,372293020.0,414550200.0,135013070.0,362483000.0,375941950.0,355319100.0,259267520.0,214808140.0,379836960.0,142551970.0,342445470.0,370095940.0,171951800.0,321280540.0,368954600.0,371790980.0,335280960.0,350077150.0,};
+int32ptr = (int32_t*)&buffer0[11072];//gradients
+for(int i = 0; i < 48; i++) v8_conv_2_bias[i] -= (int32_t)(int32ptr[i] * blr * v8_conv_2_bias_QAS[i]);
+/* layer 172:GROUP_CONV */
+const float v9_conv_0_weight_QAS[144] = {1007958.94,1093299.5,1448121.4,762328.94,1108129.4,759750.4,889469.2,2931218.8,699016.75,1680528.9,1735970.4,1499222.4,1420925.8,972586.75,1960982.8,1515908.0,1187721.4,1051038.8,1416044.9,1569698.0,722529.2,2501309.0,1840317.5,1211263.5,1216679.6,570288.8,475210.53,694962.6,280427.12,1526084.6,1664752.2,1069744.9,851453.5,1709204.0,1300035.0,903722.8,1181643.0,1146618.5,1646526.5,615266.3,846232.06,2223648.5,1553717.0,1400037.9,698424.1,375720.03,589680.25,736628.44,926699.56,660794.6,951647.06,1600680.9,821387.06,1054136.8,6.4515992e+16,2196008.2,539791.0,266761.16,378064.06,955045.8,919515.75,1054760.9,1836418.1,890818.0,418437.7,703802.06,458387.25,1113126.2,1312563.8,1822159.5,968502.56,280311.84,911323.56,1470846.5,977566.44,639234.25,1226596.5,1603540.9,1516586.6,1312212.8,1452267.4,257878.34,1497839.4,1457477.9,569662.5,456127.4,489563.94,1137202.2,798001.0,1431204.2,1015710.06,612909.0,2807876.8,1015917.25,962832.94,2423602.2,644894.75,2105475.8,1249554.5,796727.06,545106.0,781507.56,1317516.1,1230639.1,796070.1,2315072.8,2007292.5,1016033.3,4244428.5,2520067.2,476574.7,1268079.2,1541117.2,1507674.2,839337.3,1272244.0,1283148.1,1105196.5,1414403.4,816907.0,2321330.8,1359640.4,734212.25,1055476.5,1520725.9,1097113.4,1066999.0,449326.7,876044.94,1365762.1,606956.2,1260549.1,2121037.2,3004286.0,3871993.5,1310603.5,979144.75,2551785.0,1432441.9,1149393.6,1178514.4,1171216.2,905465.25,442230.6,};
+group_conv_kernel8_stride1_pad0_in8x8_out1x1_uniweight_4row16col_int8input_int8weight_inplace_revised((float*)&buffer0[8000],8,8,48,weight_fp67,NULL,v9_conv_0_weight,1,1,6912,-FLT_MAX,FLT_MAX,(float*)sbuf, &buffer0[26048], 1, 48, v9_conv_0_weight_QAS, lr);
+/* layer 173:TRANSPOSE_CONV_2D */
+pointwise_conv_4row4col_IOHW_int8input_int8w((float*)&buffer0[22976],8,8,48,(q7_t*)v8_conv_2_weight,NULL,(float*)&buffer0[8000],8,8,160,-FLT_MAX,FLT_MAX,(float*)sbuf, &buffer0[26048], 1);
+/* layer 174:WHERE */
+where_zeros_int8_inplace_bit((bool*)&buffer0[6720],10240,(signed char*)&buffer0[8000]);
+/* layer 175:SUM */
+sum_4D_exclude_int8((signed char*)&buffer0[8000],1,8,8,160,3,(int32_t*)&buffer0[6720]);
+/* layer 176:BIAS_UPDATE */
+const float v8_conv_1_bias_QAS[160] = {16137858.0,21563212.0,17260780.0,19358254.0,85725336.0,33789212.0,87651250.0,129334264.0,23150988.0,10156647.0,9286422.0,96499970.0,14149087.0,9804269.0,98743520.0,122095640.0,78369370.0,641424640.0,1016768600.0,20491758.0,10820261.0,27643276.0,20118490.0,37235176.0,21393282.0,31142066.0,29143482.0,36604060.0,37118268.0,16852376.0,40395450.0,50074420.0,46187970.0,24318626.0,34987732.0,15055983.0,156139940.0,13900276.0,287718200.0,94021310.0,77745270.0,25076366.0,21461828.0,15808157.0,27553990.0,52639372.0,36149160.0,11912032.0,73517130.0,16688680.0,14647817.0,14833902.0,30187674.0,17689720.0,20490418.0,19732992.0,30331836.0,116014240.0,24800180.0,99221550.0,117609064.0,67965130.0,120788790.0,26541078.0,14351439.0,75435660.0,102417570.0,14907382.0,20590766.0,27743390.0,55593564.0,25558178.0,18602302.0,27266332.0,10372916.0,23559026.0,26499844.0,15164472.0,106913590.0,48212860.0,14899516.0,45411452.0,17687664.0,12014631.0,18187292.0,25949242.0,109078120.0,34975864.0,17286376.0,12618020.0,25405754.0,68174200.0,11508190.0,10044020.0,12724026.0,29111284.0,25417826.0,38384540.0,24790836.0,69157430.0,21329336.0,701059840.0,170437420.0,19408258.0,17462722.0,27765084.0,18686548.0,41932252.0,179844830.0,13777060.0,22109226.0,19915148.0,25485912.0,78485290.0,61120388.0,33603380.0,106835870.0,154430500.0,20483004.0,41761750.0,106555330.0,19261402.0,27825842.0,23659052.0,15481597.0,40501756.0,29392850.0,36432090.0,14451499.0,19813580.0,21005486.0,39491684.0,43298570.0,36051500.0,13100440.0,22853044.0,57596644.0,87464056.0,26415088.0,29372180.0,23250260.0,15249762.0,47648196.0,11787393.0,19602600.0,16057196.0,19414158.0,23625946.0,22028952.0,14835767.0,22446486.0,13891527.0,25069606.0,27408362.0,34857084.0,129458870.0,14183018.0,28107708.0,40581596.0,27977578.0,};
+int32ptr = (int32_t*)&buffer0[6720];//gradients
+for(int i = 0; i < 160; i++) v8_conv_1_bias[i] -= (int32_t)(int32ptr[i] * blr * v8_conv_1_bias_QAS[i]);
+/* layer 177:TRANSPOSE_CONV_2D */
+transpose_depthwise_conv_kernel5_stride1_inpad2_outpad0_revised_IOHW((float*)&buffer0[8000],8,8,160,v8_conv_1_weight,NULL,(float*)&buffer0[8000],8,8,160,-FLT_MAX,FLT_MAX,(float*)sbuf, &buffer0[18240], 1, 0);
+/* layer 178:WHERE */
+where_zeros_int8_inplace_bit((bool*)&buffer0[5440],10240,(signed char*)&buffer0[8000]);
+/* layer 179:SUM */
+sum_4D_exclude_int8((signed char*)&buffer0[8000],1,8,8,160,3,(int32_t*)&buffer0[5440]);
+/* layer 180:BIAS_UPDATE */
+const float v8_conv_0_bias_QAS[160] = {2100977900.0,1351678800.0,987009100.0,518039740.0,1070440900.0,598152300.0,128797150.0,562859700.0,547983360.0,790556350.0,410350270.0,290908640.0,798853950.0,759504100.0,487561600.0,167976910.0,1176015100.0,658284400.0,506780900.0,541551000.0,705168640.0,570533300.0,354646400.0,635364350.0,719381570.0,378580830.0,762858240.0,655364700.0,767597100.0,1118954000.0,1089425700.0,1424433200.0,443071700.0,337256480.0,464846820.0,1470196600.0,420197660.0,450167780.0,722263700.0,346567260.0,682755800.0,93684104.0,587914940.0,333005020.0,652210400.0,770776400.0,258716080.0,742032800.0,823394300.0,623212860.0,381168000.0,856685250.0,496524100.0,810753540.0,441044830.0,768273400.0,595614300.0,1105811000.0,499714560.0,451854750.0,698055600.0,1302271700.0,814712640.0,722229100.0,645830200.0,103159420.0,272071840.0,344043300.0,712347500.0,523105820.0,1757878000.0,746519740.0,730387140.0,414409600.0,703161200.0,651859000.0,693277100.0,73233150.0,783130400.0,145056850.0,719163300.0,1287622800.0,1641206100.0,857683200.0,595890300.0,1114328800.0,767953700.0,332369000.0,575073300.0,436431300.0,735426800.0,896529540.0,2318853600.0,138243630.0,514748450.0,634093100.0,676156740.0,695723100.0,548813900.0,79865720.0,207352380.0,473178080.0,1265398900.0,449922940.0,407146000.0,282351330.0,340217020.0,721730800.0,1252677000.0,1785469700.0,433558900.0,584343800.0,515154080.0,473350140.0,945912900.0,503057730.0,966362430.0,368958750.0,268606140.0,584989200.0,843650750.0,479157400.0,889631200.0,219290560.0,283616670.0,742469300.0,294369440.0,215109250.0,356014300.0,160394000.0,1186291500.0,306448420.0,617932500.0,654389600.0,454673760.0,485262700.0,428840130.0,468009400.0,633835840.0,794194560.0,1164162700.0,292093250.0,524106700.0,340007550.0,979858600.0,488279300.0,297330430.0,949036200.0,611613800.0,854039500.0,465688580.0,1269794300.0,2015682300.0,295035620.0,800650300.0,750691200.0,1228550900.0,337203800.0,915846700.0,1606160300.0,};
+int32ptr = (int32_t*)&buffer0[5440];//gradients
+for(int i = 0; i < 160; i++) v8_conv_0_bias[i] -= (int32_t)(int32ptr[i] * blr * v8_conv_0_bias_QAS[i]);
+/* layer 181:TRANSPOSE_CONV_2D */
+pointwise_conv_4row4col_IOHW_int8input_int8w((float*)&buffer0[8000],8,8,160,(q7_t*)v8_conv_0_weight,NULL,(float*)&buffer0[5440],8,8,40,-FLT_MAX,FLT_MAX,(float*)sbuf, &buffer0[18240], 1);
+/* layer 182:WHERE */
+where_zeros_int8_inplace_bit((bool*)&buffer0[2880],2560,(signed char*)&buffer0[5440]);
+/* layer 183:CAST */
+fptr = (float*)&buffer0[18240];
+int8ptr = (int8_t*)&buffer0[5440];
+for(int i = 0; i < 2560; i++) fptr[i] = (float)int8ptr[i];
+/* layer 184:DIV */
+fptr3 = (float*)&buffer0[28480]; fptr2 = (float*)&buffer0[18240];
+for(int i = 0; i < 2560; i++) *fptr3++ = *fptr2++ / 0.03723829984664917;
+/* layer 185:MUL */
+fptr = (float*)&buffer0[28480];fptr3 = (float*)&buffer0[18240];for(int i = 0; i < 2560; i++) fptr3[i] = 0.03114733099937439 * fptr[i];
+/* layer 186:CAST */
+int8ptr = (int8_t*)&buffer0[2880];
+fptr = (float*)&buffer0[18240];
+for(int i = 0; i < 2560; i++) int8ptr[i] = (int8_t)fptr[i];
+/* layer 187:WHERE */
+where_zeros_int8_inplace_bit((bool*)&buffer0[2560],2560,(signed char*)&buffer0[2880]);
+/* layer 188:SUM */
+sum_4D_exclude_int8((signed char*)&buffer0[2880],1,8,8,40,3,(int32_t*)&buffer0[2560]);
+/* layer 189:BIAS_UPDATE */
+const float v7_conv_2_bias_QAS[40] = {63245824.0,850100100.0,804678200.0,669076300.0,191707400.0,1720771800.0,195697620.0,802941800.0,171071460.0,759663500.0,539503940.0,1098927400.0,479618660.0,991412030.0,148056380.0,599659500.0,864732400.0,852367200.0,416530560.0,1228958100.0,79589380.0,996343800.0,201048460.0,1273949700.0,308789630.0,1874868000.0,648198500.0,1286232800.0,363283140.0,229399490.0,138761020.0,659036700.0,633689500.0,438473100.0,20014516.0,884496400.0,505996160.0,525112930.0,215864720.0,75581070.0,};
+int32ptr = (int32_t*)&buffer0[2560];//gradients
+for(int i = 0; i < 40; i++) v7_conv_2_bias[i] -= (int32_t)(int32ptr[i] * blr * v7_conv_2_bias_QAS[i]);
+/* layer 190:GROUP_CONV */
+const float v8_conv_0_weight_QAS[160] = {2913407.2,1874361.0,1368676.6,718361.0,1484370.9,829452.4,178601.84,780512.5,759883.5,1096257.4,569029.06,403400.38,1107763.6,1053197.6,676097.25,232932.08,1630769.4,912837.1,702748.56,750963.8,977850.94,791153.44,491785.0,881054.06,997559.9,524974.7,1057848.6,908788.3,1064420.0,1551643.5,1510696.8,1975248.6,614403.56,467670.53,644598.9,2038708.4,582684.4,624243.6,1001556.5,480581.66,946771.2,129910.91,815256.25,461775.03,904414.3,1068828.6,358759.25,1028970.06,1141793.5,864203.75,528562.2,1187957.6,688525.5,1124264.5,611592.8,1065357.8,825932.94,1533418.0,692949.7,626582.94,967987.3,1805848.5,1129754.6,1001508.5,895566.9,143050.25,377279.56,477081.72,987805.9,725386.1,2437633.8,1035192.3,1012821.25,574658.06,975067.2,903926.94,961361.06,101551.75,1085959.9,201149.05,997257.25,1785535.1,2275845.8,1189341.5,826315.7,1545229.8,1064914.5,460893.1,797448.94,605195.3,1019809.8,1243209.4,3215533.2,191701.2,713797.06,879291.2,937620.3,964752.9,761035.4,110749.08,287533.7,656151.75,1754717.0,623904.06,564585.7,391534.06,471775.88,1000817.6,1737075.8,2475894.8,601212.25,810304.25,714359.6,656390.44,1311688.9,697585.5,1340046.1,511631.75,372473.75,811199.25,1169882.9,664443.25,1233643.5,304088.25,393288.66,1029575.4,408199.47,298290.06,493681.8,222416.9,1645019.5,424949.22,856881.44,907436.2,630492.0,672909.44,594668.7,648984.4,878934.44,1101302.4,1614333.9,405043.1,726773.94,471485.34,1358761.0,677092.56,412305.4,1316020.0,848119.5,1184288.9,645766.1,1760812.1,2795128.2,409123.22,1110254.5,1040976.9,1703620.5,467597.47,1269996.4,2227248.2,};
+group_conv_kernel8_stride1_pad0_in8x8_out1x1_uniweight_4row16col_int8input_int8weight_inplace_revised((float*)&buffer0[0],8,8,40,weight_fp71,NULL,v8_conv_0_weight,1,1,6400,-FLT_MAX,FLT_MAX,(float*)sbuf, &buffer0[2560], 1, 40, v8_conv_0_weight_QAS, lr);
+
+#endif
 }
