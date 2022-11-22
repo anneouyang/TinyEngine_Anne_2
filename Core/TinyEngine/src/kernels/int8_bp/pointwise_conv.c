@@ -146,16 +146,52 @@ tinyengine_status pointwise_conv_4row4col_IOHW_int8input_int8w(const q7_t* input
       const q7_t* filter_2 = &filter_data[(i_ch_in + 2) * output_depth];
       const q7_t* filter_3 = &filter_data[(i_ch_in + 3) * output_depth];
 
+      q15_t* runtime_buf = (q15_t*) im2col_data;
+
+      //use variables
+      q31_t in_q7x4;
+      q31_t in_q15x2_1;
+      q31_t in_q15x2_2;
+      q31_t out_q15x2_1;
+      q31_t out_q15x2_2;
+
+//       q7_q15_reordered_ele(input_0, runtime_buf);
+// //      input_0[0] = 1;
+// //      input_0[1] = 2;
+// //      input_0[2] = 3;
+// //      input_0[3] = 4;
+// //      in_q7x4 = arm_nn_read_q7x4_ia((const q7_t **)&input_0);
+// //      out_q15x2_1 = __SXTB16(__ROR(in_q7x4, 8));
+// //      out_q15x2_2 = __SXTB16(in_q7x4);
+// //      write_q15x2_ia(&runtime_buf, out_q15x2_2);
+// //      write_q15x2_ia(&runtime_buf, out_q15x2_1);
+//       input_0 -= 4;
+//       q7_q15_reordered_ele(input_1, runtime_buf);
+//       input_1 -= 4;
+//       q7_q15_reordered_ele(input_2, runtime_buf);
+//       input_2 -= 4;
+//       q7_q15_reordered_ele(input_3, runtime_buf);
+//       input_3 -= 4;
+//       runtime_buf -= 16;
+
       uint16_t col_count_div8 = (output_depth * DIM_KER_X * DIM_KER_Y) >> 3;
 
       while (col_count_div8--) {
         /* Initialize partial sum (assume bias == NULL) */
         q31_t sum[32] = {};
+//        q31_t sum2[32] = {};
 
         /* MAC computation */
         mac_4row_4col_IOHW_forint8w(&sum[0], input_0, input_1, input_2, input_3, filter_0, filter_1, filter_2, filter_3);
         filter_0++; filter_1++; filter_2++; filter_3++;
-        
+//
+//        filter_0--; filter_1--; filter_2--; filter_3--;
+//        mac_4row_4col_IOHW_forint8w_s8_fpreq(&sum2[0], runtime_buf, filter_0, filter_1, filter_2, filter_3);
+//        filter_0++; filter_1++; filter_2++; filter_3++;
+
+//        mac_4row_4col_IOHW_forint8w_s8_fpreq(&sum[0], runtime_buf, filter_0, filter_1, filter_2, filter_3);
+//        filter_0++; filter_1++; filter_2++; filter_3++;
+
         mac_4row_4col_IOHW_forint8w(&sum[4], input_0, input_1, input_2, input_3, filter_0, filter_1, filter_2, filter_3);
         filter_0++; filter_1++; filter_2++; filter_3++;
         
