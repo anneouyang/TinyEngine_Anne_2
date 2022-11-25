@@ -359,8 +359,10 @@ __STATIC_FORCEINLINE q31_t arm_nn_read_q7x4_4weights(const q7_t *filter_0, const
   //q31_t val = (((q31_t)*filter_1) << 24) + (((q31_t)*filter_0) << 16) + (((q31_t)*filter_3) << 8) + ((q31_t)*filter_2);
   
   //q31_t val = (((q31_t)*filter_3) << 24) | (((q31_t)*filter_2) << 16) | (((q31_t)*filter_1) << 8) | ((q31_t)*filter_0);
-  q31_t val = (((q31_t)*filter_3) << 24) + (((q31_t)*filter_2) << 16) + (((q31_t)*filter_1) << 8) + ((q31_t)*filter_0);
+//   q31_t val = (((q31_t)*filter_3) << 24) + (((q31_t)*filter_2) << 16) + (((q31_t)*filter_1) << 8) + ((q31_t)*filter_0);
   //q31_t val = (((q31_t)*filter_2) << 24) + (((q31_t)*filter_3) << 16) + (((q31_t)*filter_0) << 8) + ((q31_t)*filter_1);
+  
+  q31_t val = ((((q31_t)*filter_3) & 255) << 24) + ((((q31_t)*filter_2) & 255) << 16) + ((((q31_t)*filter_1) & 255) << 8) + ((((q31_t)*filter_0) & 255));
 
   return (val);
 }
