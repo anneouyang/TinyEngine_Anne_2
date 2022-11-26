@@ -39,7 +39,8 @@ void end2endinference(q7_t* img){
 void invoke(float* labels){
 #if ONLY_TRANSPOSED_CONV
 /* layer 83:TRANSPOSE_CONV_2D */
-pointwise_conv_4row4col_IOHW_int8input_int8w_partialCH(&buffer0[65536],4,4,576,(q7_t*)v14_conv_0_weight,(q7_t*)v14_conv_0_weightFlash,24,NULL, &buffer0[0],4,4,96,-FLT_MAX,FLT_MAX, sbuf, &buffer0[1536], 1);
+// pointwise_conv_4row4col_IOHW_int8input_int8w_partialCH(&buffer0[65536],4,4,576,(q7_t*)v14_conv_0_weight,(q7_t*)v14_conv_0_weightFlash,24,NULL, &buffer0[0],4,4,96,-FLT_MAX,FLT_MAX, sbuf, &buffer0[1536], 1);
+pointwise_conv_4row4col_IOHW_int8input_int8w(&buffer0[65536],4,4,576,(q7_t*)v14_conv_0_weight, NULL, &buffer0[0],4,4,96,-FLT_MAX,FLT_MAX, sbuf, &buffer0[1536], 1);
 
 #else
 /* layer 0:CONV_2D */
