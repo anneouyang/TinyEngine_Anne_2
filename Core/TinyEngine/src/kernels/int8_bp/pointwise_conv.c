@@ -146,6 +146,25 @@ tinyengine_status pointwise_conv_4row4col_IOHW_int8input_int8w(const q7_t* input
       const q7_t* filter_2 = &filter_data[(i_ch_in + 2) * output_depth];
       const q7_t* filter_3 = &filter_data[(i_ch_in + 3) * output_depth];
 
+      q15_t* runtime_buf = (q15_t*) im2col_data;
+
+//      use variables
+      q31_t in_q7x4;
+      q31_t in_q15x2_1;
+      q31_t in_q15x2_2;
+      q31_t out_q15x2_1;
+      q31_t out_q15x2_2;
+
+      q7_q15_reordered_ele(input_0, runtime_buf);
+      input_0 -= 4;
+      q7_q15_reordered_ele(input_1, runtime_buf);
+      input_1 -= 4;
+      q7_q15_reordered_ele(input_2, runtime_buf);
+      input_2 -= 4;
+      q7_q15_reordered_ele(input_3, runtime_buf);
+      input_3 -= 4;
+      runtime_buf -= 16;
+
       uint16_t col_count_div8 = (output_depth * DIM_KER_X * DIM_KER_Y) >> 3;
 
       while (col_count_div8--) {
