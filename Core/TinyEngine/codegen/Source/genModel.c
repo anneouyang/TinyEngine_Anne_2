@@ -28,7 +28,9 @@ signed char* getInput() {
 }
 signed char* getOutput() {
 #if ONLY_TRANSPOSED_CONV
-	return &buffer0[0];
+	// return &buffer0[0];
+	/* for in place depthwise kernels */
+	return &buffer0[65536];
 #else
 	return NNoutput;
 #endif
@@ -42,13 +44,15 @@ void invoke(float* labels){
 // norm data at &buffer0[1536]
 // output data at &buffer0[0]
 
-/* layer 83:TRANSPOSE_CONV_2D */
+// /* layer 83:TRANSPOSE_CONV_2D */
 // pointwise_conv_4row4col_IOHW_int8input_int8w_partialCH(&buffer0[65536],4,4,576,(q7_t*)v14_conv_0_weight,(q7_t*)v14_conv_0_weightFlash,24,NULL, &buffer0[0],4,4,96,-FLT_MAX,FLT_MAX, sbuf, &buffer0[1536], 1);
 
-/* layer 93:TRANSPOSE_CONV_2D */
-pointwise_conv_4row4col_IOHW_int8input_int8w((float*)&buffer0[65536],4,4,96,(q7_t*)v13_conv_2_weight,NULL,(float*)&buffer0[0],4,4,384,-FLT_MAX,FLT_MAX,(float*)sbuf, &buffer0[1536], 1);
+// /* layer 93:TRANSPOSE_CONV_2D */
+// pointwise_conv_4row4col_IOHW_int8input_int8w((float*)&buffer0[65536],4,4,96,(q7_t*)v13_conv_2_weight,NULL,(float*)&buffer0[0],4,4,384,-FLT_MAX,FLT_MAX,(float*)sbuf, &buffer0[1536], 1);
 
-// pointwise_conv_4row4col_IOHW_int8input_int8w(&buffer0[65536],4,4,576,(q7_t*)v14_conv_0_weight, NULL, &buffer0[0],4,4,96,-FLT_MAX,FLT_MAX, sbuf, &buffer0[1536], 1);
+/* layer 78:TRANSPOSE_CONV_2D */
+transpose_depthwise_conv_kernel3_stride1_inpad1_outpad0_revised_IOHW((float*)&buffer0[65536],4,4,576,v14_conv_1_weight,NULL,(float*)&buffer0[65536],4,4,576,-FLT_MAX,FLT_MAX,(float*)sbuf, &buffer0[1536], 1, 0);
+
 
 #else
 /* layer 0:CONV_2D */
