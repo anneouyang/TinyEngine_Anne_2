@@ -183,6 +183,7 @@ tinyengine_status transpose_depthwise_conv_kernel3_stride1_inpad1_outpad0_revise
   const int8_t* src;
   const int8_t* ksrc;
   int8_t ksrc_transposed[9];
+  int16_t ksrc_transposed_16b[9];
 
   for (c = 0; c < input_depth; c++) {
     two_column_buffer = im2col_data + input_width + 2;
@@ -205,6 +206,7 @@ tinyengine_status transpose_depthwise_conv_kernel3_stride1_inpad1_outpad0_revise
     ksrc = filter_data++;
     for (i = 0; i < DIM_KER_Y * DIM_KER_X; i++) {
       ksrc_transposed[8 - i] = *ksrc;
+      ksrc_transposed_16b[8 - i] = ksrc_transposed[8 - i];
       ksrc += input_depth;
     }
 
@@ -219,7 +221,8 @@ tinyengine_status transpose_depthwise_conv_kernel3_stride1_inpad1_outpad0_revise
         // We assume bias_data as zeros.
         int32_t sum_0 = 0;
         int32_t sum_1 = 0;
-        transpose_depthwise_mac_kernel3_2row_uniweight(&sum_0, &sum_1, two_column_buffer, ksrc_transposed, input_width, STRIDE, IN_PAD, OUT_PAD);
+        // transpose_depthwise_mac_kernel3_2row_uniweight(&sum_0, &sum_1, two_column_buffer, ksrc_transposed, input_width, STRIDE, IN_PAD, OUT_PAD);
+        transpose_depthwise_mac_kernel3_2row_uniweight_vectorize(&sum_0, &sum_1, two_column_buffer, ksrc_transposed_16b, input_width, STRIDE, IN_PAD, OUT_PAD);
         tmp_output[(i * output_width + j) * output_depth] = sum_0;
         tmp_output[(i * output_width + j + 1) * output_depth] = sum_1;
 
