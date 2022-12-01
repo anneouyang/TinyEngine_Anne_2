@@ -211,11 +211,9 @@ tinyengine_status transpose_depthwise_conv_kernel3_stride1_inpad1_outpad0_revise
     int8_t* two_column_buffer_start = im2col_data;
     q31_t* tmp_output = tmp_output_buffer;
 
-    const int unroll_factor = 2;
-
     /* MAC Computation */
     for (i = 0; i < output_height; i++) {
-      for (j = 0; j < output_width - 1; j+=unroll_factor) {
+      for (j = 0; j < output_width - 1; j+=2) {
         two_column_buffer = two_column_buffer_start;
 
         // We assume bias_data as zeros.
