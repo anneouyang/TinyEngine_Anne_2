@@ -861,6 +861,86 @@ static inline void assign_sum_to_pointwise_tmp_output_buffer_4row8col_int8(q31_t
     *out_3++ += sum[31];
 }
 
+static inline void assign_sum_to_pointwise_tmp_output_buffer_4row2col_int8(q31_t* out_0, q31_t* out_1, q31_t* out_2, q31_t* out_3, 
+                      const q31_t* sum) {
+    *out_0++ += sum[0];
+    *out_1++ += sum[1];
+    *out_2++ += sum[2];
+    *out_3++ += sum[3];
+    *out_0++ += sum[4];
+    *out_1++ += sum[5];
+    *out_2++ += sum[6];
+    *out_3++ += sum[7];
+}
+
+static inline void assign_sum_to_pointwise_tmp_output_buffer_4row16col_int8(q31_t* out_0, q31_t* out_1, q31_t* out_2, q31_t* out_3, 
+                      const q31_t* sum) {
+    *out_0++ += sum[0];
+    *out_1++ += sum[1];
+    *out_2++ += sum[2];
+    *out_3++ += sum[3];
+    *out_0++ += sum[4];
+    *out_1++ += sum[5];
+    *out_2++ += sum[6];
+    *out_3++ += sum[7];
+    *out_0++ += sum[8];
+    *out_1++ += sum[9];
+    *out_2++ += sum[10];
+    *out_3++ += sum[11];
+    *out_0++ += sum[12];
+    *out_1++ += sum[13];
+    *out_2++ += sum[14];
+    *out_3++ += sum[15];
+    *out_0++ += sum[16];
+    *out_1++ += sum[17];
+    *out_2++ += sum[18];
+    *out_3++ += sum[19];
+    *out_0++ += sum[20];
+    *out_1++ += sum[21];
+    *out_2++ += sum[22];
+    *out_3++ += sum[23];
+    *out_0++ += sum[24];
+    *out_1++ += sum[25];
+    *out_2++ += sum[26];
+    *out_3++ += sum[27];
+    *out_0++ += sum[28];
+    *out_1++ += sum[29];
+    *out_2++ += sum[30];
+    *out_3++ += sum[31];
+    *out_0++ += sum[32];
+    *out_1++ += sum[33];
+    *out_2++ += sum[34];
+    *out_3++ += sum[35];
+    *out_0++ += sum[36];
+    *out_1++ += sum[37];
+    *out_2++ += sum[38];
+    *out_3++ += sum[39];
+    *out_0++ += sum[40];
+    *out_1++ += sum[41];
+    *out_2++ += sum[42];
+    *out_3++ += sum[43];
+    *out_0++ += sum[44];
+    *out_1++ += sum[45];
+    *out_2++ += sum[46];
+    *out_3++ += sum[47];
+    *out_0++ += sum[48];
+    *out_1++ += sum[49];
+    *out_2++ += sum[50];
+    *out_3++ += sum[51];
+    *out_0++ += sum[52];
+    *out_1++ += sum[53];
+    *out_2++ += sum[54];
+    *out_3++ += sum[55];
+    *out_0++ += sum[56];
+    *out_1++ += sum[57];
+    *out_2++ += sum[58];
+    *out_3++ += sum[59];
+    *out_0++ += sum[60];
+    *out_1++ += sum[61];
+    *out_2++ += sum[62];
+    *out_3++ += sum[63];
+}
+
 static inline void assign_sum_to_pointwise_output_4row8col_int8(q7_t* out_0, q7_t* out_1, q7_t* out_2, q7_t* out_3, 
                       const q31_t* sum, const q31_t output_activation_min, const q31_t output_activation_max) {
     *out_0++ += (q7_t) MIN(MAX(sum[0], output_activation_min), output_activation_max);
@@ -1007,6 +1087,30 @@ static inline void assign_sum_to_pointwise_tmp_output_buffer_1row8col_int8(q31_t
     *out_0++ += sum[5];
     *out_0++ += sum[6];
     *out_0++ += sum[7];
+}
+
+static inline void assign_sum_to_pointwise_tmp_output_buffer_1row2col_int8(q31_t* out_0, const q31_t* sum) {
+    *out_0++ += sum[0];
+    *out_0++ += sum[1];
+}
+
+static inline void assign_sum_to_pointwise_tmp_output_buffer_1row16col_int8(q31_t* out_0, const q31_t* sum) {
+    *out_0++ += sum[0];
+    *out_0++ += sum[1];
+    *out_0++ += sum[2];
+    *out_0++ += sum[3];
+    *out_0++ += sum[4];
+    *out_0++ += sum[5];
+    *out_0++ += sum[6];
+    *out_0++ += sum[7];
+    *out_0++ += sum[8];
+    *out_0++ += sum[9];
+    *out_0++ += sum[10];
+    *out_0++ += sum[11];
+    *out_0++ += sum[12];
+    *out_0++ += sum[13];
+    *out_0++ += sum[14];
+    *out_0++ += sum[15];
 }
 
 static inline void assign_sum_to_pointwise_output_1row8col_int8(q7_t* out_0, 
