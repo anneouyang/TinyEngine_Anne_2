@@ -28,7 +28,9 @@ signed char* getInput() {
 }
 signed char* getOutput() {
 #if ONLY_TRANSPOSED_CONV
-	return &buffer0[0];
+	// return &buffer0[0];
+	/* for in place */
+	return &buffer0[65536];
 #else
 	return NNoutput;
 #endif
@@ -49,6 +51,8 @@ pointwise_conv_4row4col_IOHW_int8input_int8w_partialCH(&input_random[0],4,4,576,
 /* layer 93:TRANSPOSE_CONV_2D */
 // pointwise_conv_4row4col_IOHW_int8input_int8w((float*)&buffer0[65536],4,4,96,(q7_t*)v13_conv_2_weight,NULL,(float*)&buffer0[0],4,4,384,-FLT_MAX,FLT_MAX,(float*)sbuf, &buffer0[1536], 1);
 // pointwise_conv_4row4col_IOHW_int8input_int8w((float*)&input_random[0],4,4,96,(q7_t*)v13_conv_2_weight,NULL,(float*)&buffer0[0],4,4,384,-FLT_MAX,FLT_MAX,(float*)sbuf, &buffer0[1536], 1);
+
+group_conv_kernel4_stride1_pad0_in4x4_out1x1_uniweight_4row8col_int8input_int8weight_inplace_revised(&buffer0[65536], 4, 4, 128, v10_conv_0_weight, NULL, &buffer0[65536], 1, 1, 256, -FLT_MAX, FLT_MAX, sbuf, &buffer[1536], 1, 8, scales27, 0.1);
 
 // pointwise_conv_4row4col_IOHW_int8input_int8w(&buffer0[65536],4,4,576,(q7_t*)v14_conv_0_weight, NULL, &buffer0[0],4,4,96,-FLT_MAX,FLT_MAX, sbuf, &buffer0[1536], 1);
 
