@@ -89,11 +89,6 @@ tinyengine_status pointwise_conv_1row10col_10inputdepth_IOHW_int8w(const q7_t* i
   return STATE_SUCCESS;
 }
 
-
-// In this operator: 
-//   - "IOHW" means different from the layout of general pointwise conv kernels which are OHWI (NHWC), the layout of conv kernels here in backward 
-//     propagation are IOHW (CNHW).
-//   - "int8input" and "int8w" just mean int8 input and int8 weight (to differentiate with our fp32 operators.)
 tinyengine_status pointwise_conv_4row4col_IOHW_int8input_int8w(const q7_t* input_data, 
                  const uint16_t input_height, const uint16_t input_width, const uint16_t input_depth, 
                  const q7_t* filter_data, const q31_t* bias_data, 
@@ -148,8 +143,6 @@ tinyengine_status pointwise_conv_4row4col_IOHW_int8input_int8w(const q7_t* input
 
       
       q15_t* runtime_buf = (q15_t*) im2col_data;
-      // q15_t tmp_buf[64] = {};
-      // q15_t* runtime_buf = (q15_t*) &tmp_buf;
 
       // use variables
       q31_t in_q7x4;
@@ -158,39 +151,8 @@ tinyengine_status pointwise_conv_4row4col_IOHW_int8input_int8w(const q7_t* input
       q31_t out_q15x2_1;
       q31_t out_q15x2_2;
 
-      // unsigned int in_q7x4;
-      // unsigned int in_q15x2_1;
-      // unsigned int in_q15x2_2;
-      // unsigned int out_q15x2_1;
-      // unsigned int out_q15x2_2;
-
-      // runtime_buf[0] = 1;
-      // runtime_buf[1] = 1;
-      // runtime_buf[2] = 1;
-      // runtime_buf[3] = 1;
-      // runtime_buf[4] = 1;
-      // runtime_buf[5] = 1;
-      // runtime_buf[6] = 1;
-      // runtime_buf[7] = 1;
-      // runtime_buf[8] = 1;
-      // runtime_buf[9] = 1;
-      // runtime_buf[10] = 1;
-      // runtime_buf[11] = 1;
-      // runtime_buf[12] = 1;
-      // runtime_buf[13] = 1;
-      // runtime_buf[14] = 1;
-      // runtime_buf[15] = 1;
-
       q7_q15_reordered_ele(input_0, runtime_buf);
       input_0 -= 4;
-      // in_q7x4 = arm_nn_read_q7x4_ia((const q7_t **)&input_1);
-      // input_1 -= 4;
-      // out_q15x2_1 = __ROR(in_q7x4, 8);
-      // out_q15x2_1 = __SXTB16(out_q15x2_1);
-      // out_q15x2_1 = __SXTB16(__ROR(in_q7x4, 8));
-      // out_q15x2_2 = __SXTB16(in_q7x4);
-      // write_q15x2_ia(&runtime_buf, out_q15x2_2);
-      // write_q15x2_ia(&runtime_buf, out_q15x2_1);
       q7_q15_reordered_ele(input_1, runtime_buf);
       input_1 -= 4;
       q7_q15_reordered_ele(input_2, runtime_buf);
@@ -204,55 +166,6 @@ tinyengine_status pointwise_conv_4row4col_IOHW_int8input_int8w(const q7_t* input
       while (col_count_div8--) {
         /* Initialize partial sum (assume bias == NULL) */
         q31_t sum[32] = {};
-
-        // /* MAC computation */
-        // mac_4row_4col_IOHW_forint8w(&sum[0], input_0, input_1, input_2, input_3, filter_0, filter_1, filter_2, filter_3);
-        // filter_0++; filter_1++; filter_2++; filter_3++;
-
-        // // mac_4row_4col_IOHW_forint8w_s8_fpreq(&sum[0], runtime_buf, filter_0, filter_1, filter_2, filter_3);
-        // // filter_0++; filter_1++; filter_2++; filter_3++;
-        
-        // mac_4row_4col_IOHW_forint8w(&sum[4], input_0, input_1, input_2, input_3, filter_0, filter_1, filter_2, filter_3);
-        // filter_0++; filter_1++; filter_2++; filter_3++;
-
-        // // mac_4row_4col_IOHW_forint8w_s8_fpreq(&sum[4], runtime_buf, filter_0, filter_1, filter_2, filter_3);
-        // // filter_0++; filter_1++; filter_2++; filter_3++;
-        
-        // mac_4row_4col_IOHW_forint8w(&sum[8], input_0, input_1, input_2, input_3, filter_0, filter_1, filter_2, filter_3);
-        // filter_0++; filter_1++; filter_2++; filter_3++;
-
-        // // mac_4row_4col_IOHW_forint8w_s8_fpreq(&sum[8], runtime_buf, filter_0, filter_1, filter_2, filter_3);
-        // // filter_0++; filter_1++; filter_2++; filter_3++;
-        
-        // mac_4row_4col_IOHW_forint8w(&sum[12], input_0, input_1, input_2, input_3, filter_0, filter_1, filter_2, filter_3);
-        // filter_0++; filter_1++; filter_2++; filter_3++;
-
-        // // mac_4row_4col_IOHW_forint8w_s8_fpreq(&sum[12], runtime_buf, filter_0, filter_1, filter_2, filter_3);
-        // // filter_0++; filter_1++; filter_2++; filter_3++;
-        
-        // mac_4row_4col_IOHW_forint8w(&sum[16], input_0, input_1, input_2, input_3, filter_0, filter_1, filter_2, filter_3);
-        // filter_0++; filter_1++; filter_2++; filter_3++;
-
-        // // mac_4row_4col_IOHW_forint8w_s8_fpreq(&sum[16], runtime_buf, filter_0, filter_1, filter_2, filter_3);
-        // // filter_0++; filter_1++; filter_2++; filter_3++;
-        
-        // mac_4row_4col_IOHW_forint8w(&sum[20], input_0, input_1, input_2, input_3, filter_0, filter_1, filter_2, filter_3);
-        // filter_0++; filter_1++; filter_2++; filter_3++;
-
-        // // mac_4row_4col_IOHW_forint8w_s8_fpreq(&sum[20], runtime_buf, filter_0, filter_1, filter_2, filter_3);
-        // // filter_0++; filter_1++; filter_2++; filter_3++;
-        
-        // mac_4row_4col_IOHW_forint8w(&sum[24], input_0, input_1, input_2, input_3, filter_0, filter_1, filter_2, filter_3);
-        // filter_0++; filter_1++; filter_2++; filter_3++;
-
-        // // mac_4row_4col_IOHW_forint8w_s8_fpreq(&sum[24], runtime_buf, filter_0, filter_1, filter_2, filter_3);
-        // // filter_0++; filter_1++; filter_2++; filter_3++;
-        
-        // mac_4row_4col_IOHW_forint8w(&sum[28], input_0, input_1, input_2, input_3, filter_0, filter_1, filter_2, filter_3);
-        // filter_0++; filter_1++; filter_2++; filter_3++;
-
-        // // mac_4row_4col_IOHW_forint8w_s8_fpreq(&sum[28], runtime_buf, filter_0, filter_1, filter_2, filter_3);
-        // // filter_0++; filter_1++; filter_2++; filter_3++;
 
         /* MAC computation */
 
@@ -354,6 +267,19 @@ tinyengine_status pointwise_conv_4row4col_IOHW_int8input_int8w(const q7_t* input
       const q7_t* filter_2 = &filter_data[(i_ch_in + 2) * output_depth];
       const q7_t* filter_3 = &filter_data[(i_ch_in + 3) * output_depth];
 
+      q15_t* runtime_buf = (q15_t*) im2col_data;
+
+      // use variables
+      q31_t in_q7x4;
+      q31_t in_q15x2_1;
+      q31_t in_q15x2_2;
+      q31_t out_q15x2_1;
+      q31_t out_q15x2_2;
+
+      q7_q15_reordered_ele(input_0, runtime_buf);
+      input_0 -= 4;
+      runtime_buf -= 16;
+
       uint16_t col_count_div8 = (output_depth * DIM_KER_X * DIM_KER_Y) >> 3;
 
       while (col_count_div8--) {
@@ -361,28 +287,28 @@ tinyengine_status pointwise_conv_4row4col_IOHW_int8input_int8w(const q7_t* input
         q31_t sum[8] = {};
 
         /* MAC computation */
-        mac_1row_4col_IOHW_forint8w(&sum[0], input_0, filter_0, filter_1, filter_2, filter_3);
+        mac_1row_4col_IOHW_forint8w_s8_fpreq(&sum[0], runtime_buf, filter_0, filter_1, filter_2, filter_3);
         filter_0++; filter_1++; filter_2++; filter_3++;
 
-        mac_1row_4col_IOHW_forint8w(&sum[1], input_0, filter_0, filter_1, filter_2, filter_3);
+        mac_1row_4col_IOHW_forint8w_s8_fpreq(&sum[1], runtime_buf, filter_0, filter_1, filter_2, filter_3);
         filter_0++; filter_1++; filter_2++; filter_3++;
 
-        mac_1row_4col_IOHW_forint8w(&sum[2], input_0, filter_0, filter_1, filter_2, filter_3);
+        mac_1row_4col_IOHW_forint8w_s8_fpreq(&sum[2], runtime_buf, filter_0, filter_1, filter_2, filter_3);
         filter_0++; filter_1++; filter_2++; filter_3++;
 
-        mac_1row_4col_IOHW_forint8w(&sum[3], input_0, filter_0, filter_1, filter_2, filter_3);
+        mac_1row_4col_IOHW_forint8w_s8_fpreq(&sum[3], runtime_buf, filter_0, filter_1, filter_2, filter_3);
         filter_0++; filter_1++; filter_2++; filter_3++;
 
-        mac_1row_4col_IOHW_forint8w(&sum[4], input_0, filter_0, filter_1, filter_2, filter_3);
+        mac_1row_4col_IOHW_forint8w_s8_fpreq(&sum[4], runtime_buf, filter_0, filter_1, filter_2, filter_3);
         filter_0++; filter_1++; filter_2++; filter_3++;
 
-        mac_1row_4col_IOHW_forint8w(&sum[5], input_0, filter_0, filter_1, filter_2, filter_3);
+        mac_1row_4col_IOHW_forint8w_s8_fpreq(&sum[5], runtime_buf, filter_0, filter_1, filter_2, filter_3);
         filter_0++; filter_1++; filter_2++; filter_3++;
 
-        mac_1row_4col_IOHW_forint8w(&sum[6], input_0, filter_0, filter_1, filter_2, filter_3);
+        mac_1row_4col_IOHW_forint8w_s8_fpreq(&sum[6], runtime_buf, filter_0, filter_1, filter_2, filter_3);
         filter_0++; filter_1++; filter_2++; filter_3++;
 
-        mac_1row_4col_IOHW_forint8w(&sum[7], input_0, filter_0, filter_1, filter_2, filter_3);
+        mac_1row_4col_IOHW_forint8w_s8_fpreq(&sum[7], runtime_buf, filter_0, filter_1, filter_2, filter_3);
         filter_0++; filter_1++; filter_2++; filter_3++;
 
         /* Accumulate partial sum into output data */
@@ -415,7 +341,6 @@ tinyengine_status pointwise_conv_4row4col_IOHW_int8input_int8w(const q7_t* input
   /* Return to application */
   return STATE_SUCCESS;
 }
-
 
 // partialCH is to enable sparse update.
 tinyengine_status pointwise_conv_4row4col_IOHW_int8input_int8w_partialCH(const q7_t* input_data, 
