@@ -1081,6 +1081,88 @@ static inline void transpose_depthwise_mac_kernel3_2row_uniweight(q31_t* sum_0, 
     *sum_1 += two_column_buffer[3] * ksrc_transposed[8];
 }
 
+static inline void transpose_depthwise_mac_kernel3_nrow_uniweight(q31_t* sum, int n,
+                      const q7_t* two_column_buffer, const q7_t* ksrc_transposed, const uint16_t input_width, 
+                      const uint16_t STRIDE, const uint16_t IN_PAD, const uint16_t OUT_PAD) {
+    for(int i = 0; i < 3; i++) {
+      for(int j = 0; j < 3; j++) {
+        for(int k = 0; k < n; k++) {
+          sum[k] += two_column_buffer[k + j] * ksrc_transposed[i * 3 + j];
+        }
+      }
+      if (i < 2) {
+        two_column_buffer += (input_width - 1) * STRIDE + 1 + IN_PAD * 2 + OUT_PAD;
+      }
+    }
+}
+
+static inline void transpose_depthwise_mac_kernelx_yrow_uniweight(int ks, int n, q31_t* sum, 
+                      const q7_t* two_column_buffer, const q7_t* ksrc_transposed, const uint16_t input_width, 
+                      const uint16_t STRIDE, const uint16_t IN_PAD, const uint16_t OUT_PAD) {
+    for(int i = 0; i < ks; i++) {
+      for(int j = 0; j < ks; j++) {
+        for(int k = 0; k < n; k++) {
+          sum[k] += two_column_buffer[k + j] * ksrc_transposed[i * ks + j];
+        }
+      }
+      if (i < ks - 1) {
+        two_column_buffer += (input_width - 1) * STRIDE + 1 + IN_PAD * 2 + OUT_PAD;
+      }
+    }
+}
+
+static inline void transpose_depthwise_mac_kernel3_4row_uniweight(q31_t* sum, 
+                      const q7_t* two_column_buffer, const q7_t* ksrc_transposed, const uint16_t input_width, 
+                      const uint16_t STRIDE, const uint16_t IN_PAD, const uint16_t OUT_PAD) {
+    
+    sum[0] += two_column_buffer[0] * ksrc_transposed[0];
+    sum[1] += two_column_buffer[1] * ksrc_transposed[0];
+    sum[2] += two_column_buffer[2] * ksrc_transposed[0];
+    sum[3] += two_column_buffer[3] * ksrc_transposed[0];
+
+    sum[0] += two_column_buffer[1] * ksrc_transposed[1];
+    sum[1] += two_column_buffer[2] * ksrc_transposed[1];
+    sum[2] += two_column_buffer[3] * ksrc_transposed[1];
+    sum[3] += two_column_buffer[4] * ksrc_transposed[1];
+    
+    sum[0] += two_column_buffer[2] * ksrc_transposed[2];
+    sum[1] += two_column_buffer[3] * ksrc_transposed[2];
+    sum[2] += two_column_buffer[4] * ksrc_transposed[2];
+    sum[3] += two_column_buffer[5] * ksrc_transposed[2];
+    two_column_buffer += (input_width - 1) * STRIDE + 1 + IN_PAD * 2 + OUT_PAD;
+
+    sum[0] += two_column_buffer[0] * ksrc_transposed[3];
+    sum[1] += two_column_buffer[1] * ksrc_transposed[3];
+    sum[2] += two_column_buffer[2] * ksrc_transposed[3];
+    sum[3] += two_column_buffer[3] * ksrc_transposed[3];
+
+    sum[0] += two_column_buffer[1] * ksrc_transposed[4];
+    sum[1] += two_column_buffer[2] * ksrc_transposed[4];
+    sum[2] += two_column_buffer[3] * ksrc_transposed[4];
+    sum[3] += two_column_buffer[4] * ksrc_transposed[4];
+    
+    sum[0] += two_column_buffer[2] * ksrc_transposed[5];
+    sum[1] += two_column_buffer[3] * ksrc_transposed[5];
+    sum[2] += two_column_buffer[4] * ksrc_transposed[5];
+    sum[3] += two_column_buffer[5] * ksrc_transposed[5];
+    two_column_buffer += (input_width - 1) * STRIDE + 1 + IN_PAD * 2 + OUT_PAD;
+
+    sum[0] += two_column_buffer[0] * ksrc_transposed[6];
+    sum[1] += two_column_buffer[1] * ksrc_transposed[6];
+    sum[2] += two_column_buffer[2] * ksrc_transposed[6];
+    sum[3] += two_column_buffer[3] * ksrc_transposed[6];
+
+    sum[0] += two_column_buffer[1] * ksrc_transposed[7];
+    sum[1] += two_column_buffer[2] * ksrc_transposed[7];
+    sum[2] += two_column_buffer[3] * ksrc_transposed[7];
+    sum[3] += two_column_buffer[4] * ksrc_transposed[7];
+    
+    sum[0] += two_column_buffer[2] * ksrc_transposed[8];
+    sum[1] += two_column_buffer[3] * ksrc_transposed[8];
+    sum[2] += two_column_buffer[4] * ksrc_transposed[8];
+    sum[3] += two_column_buffer[5] * ksrc_transposed[8];
+}
+
 static inline void transpose_depthwise_mac_kernel3_1row_uniweight(q31_t* sum_0, 
                       const q7_t* two_column_buffer, const q7_t* ksrc_transposed, const uint16_t input_width, 
                       const uint16_t STRIDE, const uint16_t IN_PAD, const uint16_t OUT_PAD) {
