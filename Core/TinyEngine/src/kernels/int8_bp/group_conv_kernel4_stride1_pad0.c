@@ -218,6 +218,12 @@ tinyengine_status group_conv_kernel4_stride1_pad0_in4x4_out1x1_uniweight_4row16c
 
     const q7_t* input = input_data;
 
+    /* Point to the beginning of the im2col buffer where the input is available as a rearranged column */
+    const q7_t* input_0 = &im2col_data[DIM_KER_X * DIM_KER_Y * 16];
+    const q7_t* input_1 = &im2col_data[DIM_KER_X * DIM_KER_Y * 17];
+    const q7_t* input_2 = &im2col_data[DIM_KER_X * DIM_KER_Y * 18];
+    const q7_t* input_3 = &im2col_data[DIM_KER_X * DIM_KER_Y * 19];
+
     /* Calculate 4 rows(input channels) at a time */
     uint16_t group_cnt = groups >> 2;
     while (group_cnt--) {
@@ -243,12 +249,6 @@ tinyengine_status group_conv_kernel4_stride1_pad0_in4x4_out1x1_uniweight_4row16c
           src_19 += input_depth;
         }
       }
-
-      /* Point to the beginning of the im2col buffer where the input is available as a rearranged column */
-      const q7_t* input_0 = &im2col_data[DIM_KER_X * DIM_KER_Y * 16];
-      const q7_t* input_1 = &im2col_data[DIM_KER_X * DIM_KER_Y * 17];
-      const q7_t* input_2 = &im2col_data[DIM_KER_X * DIM_KER_Y * 18];
-      const q7_t* input_3 = &im2col_data[DIM_KER_X * DIM_KER_Y * 19];
 
       const q7_t* filter = im2col_data;
 
