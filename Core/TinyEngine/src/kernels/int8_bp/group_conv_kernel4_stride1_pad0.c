@@ -5,6 +5,9 @@
  * -------------------------------------------------------------------- */
 #include "tinyengine_function.h"
 #include "nnfunctions.h"
+#include "arm_nnfunctions.h"
+#include "img2col_element.h"
+
 #define DIM_KER_X (4U)
 #define DIM_KER_Y (4U)
 
@@ -224,6 +227,37 @@ tinyengine_status group_conv_kernel4_stride1_pad0_in4x4_out1x1_uniweight_4row16c
     const q7_t* input_2 = &im2col_data[DIM_KER_X * DIM_KER_Y * 18];
     const q7_t* input_3 = &im2col_data[DIM_KER_X * DIM_KER_Y * 19];
 
+    // use variables
+    q31_t in_q7x4;
+    q31_t in_q15x2_1;
+    q31_t in_q15x2_2;
+    q31_t out_q15x2_1;
+    q31_t out_q15x2_2;
+
+    q15_t temp_buf[64] = {};
+    q15_t* runtime_buf = (q15_t*) temp_buf;
+    q7_q15_reordered_ele(input_0, runtime_buf);
+    q7_q15_reordered_ele(input_0, runtime_buf);
+    q7_q15_reordered_ele(input_0, runtime_buf);
+    q7_q15_reordered_ele(input_0, runtime_buf);
+    input_0 -= 16;
+    q7_q15_reordered_ele(input_1, runtime_buf);
+    q7_q15_reordered_ele(input_1, runtime_buf);
+    q7_q15_reordered_ele(input_1, runtime_buf);
+    q7_q15_reordered_ele(input_1, runtime_buf);
+    input_1 -= 16;
+    q7_q15_reordered_ele(input_2, runtime_buf);
+    q7_q15_reordered_ele(input_2, runtime_buf);
+    q7_q15_reordered_ele(input_2, runtime_buf);
+    q7_q15_reordered_ele(input_2, runtime_buf);
+    input_2 -= 16;
+    q7_q15_reordered_ele(input_3, runtime_buf);
+    q7_q15_reordered_ele(input_3, runtime_buf);
+    q7_q15_reordered_ele(input_3, runtime_buf);
+    q7_q15_reordered_ele(input_3, runtime_buf);
+    input_3 -= 16;
+    runtime_buf -= 64;
+
     /* Calculate 4 rows(input channels) at a time */
     uint16_t group_cnt = groups >> 2;
     while (group_cnt--) {
@@ -259,37 +293,70 @@ tinyengine_status group_conv_kernel4_stride1_pad0_in4x4_out1x1_uniweight_4row16c
       q31_t sum_3[16] = {};
       
       /* Group Conv Computation */
-      group_mac_kernel4_4row_uniweight_reuse_output_input(&sum_0[0], &sum_1[0], &sum_2[0], &sum_3[0], input_0, input_1, input_2, input_3, filter);
+      // group_mac_kernel4_4row_uniweight_reuse_output_input(&sum_0[0], &sum_1[0], &sum_2[0], &sum_3[0], input_0, input_1, input_2, input_3, filter);
+      // filter += DIM_KER_X * DIM_KER_Y;
+      // group_mac_kernel4_4row_uniweight_reuse_output_input(&sum_0[1], &sum_1[1], &sum_2[1], &sum_3[1], input_0, input_1, input_2, input_3, filter);
+      // filter += DIM_KER_X * DIM_KER_Y;
+      // group_mac_kernel4_4row_uniweight_reuse_output_input(&sum_0[2], &sum_1[2], &sum_2[2], &sum_3[2], input_0, input_1, input_2, input_3, filter);
+      // filter += DIM_KER_X * DIM_KER_Y;
+      // group_mac_kernel4_4row_uniweight_reuse_output_input(&sum_0[3], &sum_1[3], &sum_2[3], &sum_3[3], input_0, input_1, input_2, input_3, filter);
+      // filter += DIM_KER_X * DIM_KER_Y;
+      // group_mac_kernel4_4row_uniweight_reuse_output_input(&sum_0[4], &sum_1[4], &sum_2[4], &sum_3[4], input_0, input_1, input_2, input_3, filter);
+      // filter += DIM_KER_X * DIM_KER_Y;
+      // group_mac_kernel4_4row_uniweight_reuse_output_input(&sum_0[5], &sum_1[5], &sum_2[5], &sum_3[5], input_0, input_1, input_2, input_3, filter);
+      // filter += DIM_KER_X * DIM_KER_Y;
+      // group_mac_kernel4_4row_uniweight_reuse_output_input(&sum_0[6], &sum_1[6], &sum_2[6], &sum_3[6], input_0, input_1, input_2, input_3, filter);
+      // filter += DIM_KER_X * DIM_KER_Y;
+      // group_mac_kernel4_4row_uniweight_reuse_output_input(&sum_0[7], &sum_1[7], &sum_2[7], &sum_3[7], input_0, input_1, input_2, input_3, filter);
+      // filter += DIM_KER_X * DIM_KER_Y;
+      // group_mac_kernel4_4row_uniweight_reuse_output_input(&sum_0[8], &sum_1[8], &sum_2[8], &sum_3[8], input_0, input_1, input_2, input_3, filter);
+      // filter += DIM_KER_X * DIM_KER_Y;
+      // group_mac_kernel4_4row_uniweight_reuse_output_input(&sum_0[9], &sum_1[9], &sum_2[9], &sum_3[9], input_0, input_1, input_2, input_3, filter);
+      // filter += DIM_KER_X * DIM_KER_Y;
+      // group_mac_kernel4_4row_uniweight_reuse_output_input(&sum_0[10], &sum_1[10], &sum_2[10], &sum_3[10], input_0, input_1, input_2, input_3, filter);
+      // filter += DIM_KER_X * DIM_KER_Y;
+      // group_mac_kernel4_4row_uniweight_reuse_output_input(&sum_0[11], &sum_1[11], &sum_2[11], &sum_3[11], input_0, input_1, input_2, input_3, filter);
+      // filter += DIM_KER_X * DIM_KER_Y;
+      // group_mac_kernel4_4row_uniweight_reuse_output_input(&sum_0[12], &sum_1[12], &sum_2[12], &sum_3[12], input_0, input_1, input_2, input_3, filter);
+      // filter += DIM_KER_X * DIM_KER_Y;
+      // group_mac_kernel4_4row_uniweight_reuse_output_input(&sum_0[13], &sum_1[13], &sum_2[13], &sum_3[13], input_0, input_1, input_2, input_3, filter);
+      // filter += DIM_KER_X * DIM_KER_Y;
+      // group_mac_kernel4_4row_uniweight_reuse_output_input(&sum_0[14], &sum_1[14], &sum_2[14], &sum_3[14], input_0, input_1, input_2, input_3, filter);
+      // filter += DIM_KER_X * DIM_KER_Y;
+      // group_mac_kernel4_4row_uniweight_reuse_output_input(&sum_0[15], &sum_1[15], &sum_2[15], &sum_3[15], input_0, input_1, input_2, input_3, filter);
+      // filter += DIM_KER_X * DIM_KER_Y;
+
+      group_mac_kernel4_4row_uniweight_reuse_output_input_simd(&sum_0[0], &sum_1[0], &sum_2[0], &sum_3[0], runtime_buf, filter);
       filter += DIM_KER_X * DIM_KER_Y;
-      group_mac_kernel4_4row_uniweight_reuse_output_input(&sum_0[1], &sum_1[1], &sum_2[1], &sum_3[1], input_0, input_1, input_2, input_3, filter);
+      group_mac_kernel4_4row_uniweight_reuse_output_input_simd(&sum_0[1], &sum_1[1], &sum_2[1], &sum_3[1], runtime_buf, filter);
       filter += DIM_KER_X * DIM_KER_Y;
-      group_mac_kernel4_4row_uniweight_reuse_output_input(&sum_0[2], &sum_1[2], &sum_2[2], &sum_3[2], input_0, input_1, input_2, input_3, filter);
+      group_mac_kernel4_4row_uniweight_reuse_output_input_simd(&sum_0[2], &sum_1[2], &sum_2[2], &sum_3[2], runtime_buf, filter);
       filter += DIM_KER_X * DIM_KER_Y;
-      group_mac_kernel4_4row_uniweight_reuse_output_input(&sum_0[3], &sum_1[3], &sum_2[3], &sum_3[3], input_0, input_1, input_2, input_3, filter);
+      group_mac_kernel4_4row_uniweight_reuse_output_input_simd(&sum_0[3], &sum_1[3], &sum_2[3], &sum_3[3], runtime_buf, filter);
       filter += DIM_KER_X * DIM_KER_Y;
-      group_mac_kernel4_4row_uniweight_reuse_output_input(&sum_0[4], &sum_1[4], &sum_2[4], &sum_3[4], input_0, input_1, input_2, input_3, filter);
+      group_mac_kernel4_4row_uniweight_reuse_output_input_simd(&sum_0[4], &sum_1[4], &sum_2[4], &sum_3[4], runtime_buf, filter);
       filter += DIM_KER_X * DIM_KER_Y;
-      group_mac_kernel4_4row_uniweight_reuse_output_input(&sum_0[5], &sum_1[5], &sum_2[5], &sum_3[5], input_0, input_1, input_2, input_3, filter);
+      group_mac_kernel4_4row_uniweight_reuse_output_input_simd(&sum_0[5], &sum_1[5], &sum_2[5], &sum_3[5], runtime_buf, filter);
       filter += DIM_KER_X * DIM_KER_Y;
-      group_mac_kernel4_4row_uniweight_reuse_output_input(&sum_0[6], &sum_1[6], &sum_2[6], &sum_3[6], input_0, input_1, input_2, input_3, filter);
+      group_mac_kernel4_4row_uniweight_reuse_output_input_simd(&sum_0[6], &sum_1[6], &sum_2[6], &sum_3[6], runtime_buf, filter);
       filter += DIM_KER_X * DIM_KER_Y;
-      group_mac_kernel4_4row_uniweight_reuse_output_input(&sum_0[7], &sum_1[7], &sum_2[7], &sum_3[7], input_0, input_1, input_2, input_3, filter);
+      group_mac_kernel4_4row_uniweight_reuse_output_input_simd(&sum_0[7], &sum_1[7], &sum_2[7], &sum_3[7], runtime_buf, filter);
       filter += DIM_KER_X * DIM_KER_Y;
-      group_mac_kernel4_4row_uniweight_reuse_output_input(&sum_0[8], &sum_1[8], &sum_2[8], &sum_3[8], input_0, input_1, input_2, input_3, filter);
+      group_mac_kernel4_4row_uniweight_reuse_output_input_simd(&sum_0[8], &sum_1[8], &sum_2[8], &sum_3[8], runtime_buf, filter);
       filter += DIM_KER_X * DIM_KER_Y;
-      group_mac_kernel4_4row_uniweight_reuse_output_input(&sum_0[9], &sum_1[9], &sum_2[9], &sum_3[9], input_0, input_1, input_2, input_3, filter);
+      group_mac_kernel4_4row_uniweight_reuse_output_input_simd(&sum_0[9], &sum_1[9], &sum_2[9], &sum_3[9], runtime_buf, filter);
       filter += DIM_KER_X * DIM_KER_Y;
-      group_mac_kernel4_4row_uniweight_reuse_output_input(&sum_0[10], &sum_1[10], &sum_2[10], &sum_3[10], input_0, input_1, input_2, input_3, filter);
+      group_mac_kernel4_4row_uniweight_reuse_output_input_simd(&sum_0[10], &sum_1[10], &sum_2[10], &sum_3[10], runtime_buf, filter);
       filter += DIM_KER_X * DIM_KER_Y;
-      group_mac_kernel4_4row_uniweight_reuse_output_input(&sum_0[11], &sum_1[11], &sum_2[11], &sum_3[11], input_0, input_1, input_2, input_3, filter);
+      group_mac_kernel4_4row_uniweight_reuse_output_input_simd(&sum_0[11], &sum_1[11], &sum_2[11], &sum_3[11], runtime_buf, filter);
       filter += DIM_KER_X * DIM_KER_Y;
-      group_mac_kernel4_4row_uniweight_reuse_output_input(&sum_0[12], &sum_1[12], &sum_2[12], &sum_3[12], input_0, input_1, input_2, input_3, filter);
+      group_mac_kernel4_4row_uniweight_reuse_output_input_simd(&sum_0[12], &sum_1[12], &sum_2[12], &sum_3[12], runtime_buf, filter);
       filter += DIM_KER_X * DIM_KER_Y;
-      group_mac_kernel4_4row_uniweight_reuse_output_input(&sum_0[13], &sum_1[13], &sum_2[13], &sum_3[13], input_0, input_1, input_2, input_3, filter);
+      group_mac_kernel4_4row_uniweight_reuse_output_input_simd(&sum_0[13], &sum_1[13], &sum_2[13], &sum_3[13], runtime_buf, filter);
       filter += DIM_KER_X * DIM_KER_Y;
-      group_mac_kernel4_4row_uniweight_reuse_output_input(&sum_0[14], &sum_1[14], &sum_2[14], &sum_3[14], input_0, input_1, input_2, input_3, filter);
+      group_mac_kernel4_4row_uniweight_reuse_output_input_simd(&sum_0[14], &sum_1[14], &sum_2[14], &sum_3[14], runtime_buf, filter);
       filter += DIM_KER_X * DIM_KER_Y;
-      group_mac_kernel4_4row_uniweight_reuse_output_input(&sum_0[15], &sum_1[15], &sum_2[15], &sum_3[15], input_0, input_1, input_2, input_3, filter);
+      group_mac_kernel4_4row_uniweight_reuse_output_input_simd(&sum_0[15], &sum_1[15], &sum_2[15], &sum_3[15], runtime_buf, filter);
       filter += DIM_KER_X * DIM_KER_Y;
 
       /* Calculate outputs */      

@@ -487,6 +487,120 @@ static inline void group_mac_kernel4_4row_uniweight_reuse_output_input(q31_t* su
     tmp += input_3[15] * filter[15];
     *sum_3 += tmp;
 }
+
+static inline void group_mac_kernel4_4row_uniweight_reuse_output_input_simd(q31_t* sum_0, q31_t* sum_1, q31_t* sum_2, q31_t* sum_3,
+           const q15_t* runtime_buf,
+           const q7_t* filter) {
+
+    // use variables
+    q31_t in_q7x4;
+    q31_t in_q15x2_1;
+    q31_t in_q15x2_2;
+    q31_t out_q15x2_1;
+    q31_t out_q15x2_2;
+
+    const q15_t* ip_b0 = runtime_buf;
+    q31_t b0;
+    q31_t a01, a02;
+    q7_t dummy;
+
+    q31_t tmp;
+    tmp = 0;
+    b0 = arm_nn_read_q15x2_ia(&ip_b0);
+    dummy = read_and_pad_reordered(filter, &a01, &a02);
+    tmp =  __SMLAD(a01, b0, tmp);
+    b0 = arm_nn_read_q15x2_ia(&ip_b0);
+    tmp = __SMLAD(a02, b0, tmp);
+    b0 = arm_nn_read_q15x2_ia(&ip_b0);
+    dummy = read_and_pad_reordered(filter, &a01, &a02);
+    tmp =  __SMLAD(a01, b0, tmp);
+    b0 = arm_nn_read_q15x2_ia(&ip_b0);
+    tmp = __SMLAD(a02, b0, tmp);
+    b0 = arm_nn_read_q15x2_ia(&ip_b0);
+    dummy = read_and_pad_reordered(filter, &a01, &a02);
+    tmp =  __SMLAD(a01, b0, tmp);
+    b0 = arm_nn_read_q15x2_ia(&ip_b0);
+    tmp = __SMLAD(a02, b0, tmp);
+    b0 = arm_nn_read_q15x2_ia(&ip_b0);
+    dummy = read_and_pad_reordered(filter, &a01, &a02);
+    tmp =  __SMLAD(a01, b0, tmp);
+    b0 = arm_nn_read_q15x2_ia(&ip_b0);
+    tmp = __SMLAD(a02, b0, tmp);
+    filter -= 16;
+    *sum_0 += tmp;
+
+    tmp = 0;
+    b0 = arm_nn_read_q15x2_ia(&ip_b0);
+    dummy = read_and_pad_reordered(filter, &a01, &a02);
+    tmp =  __SMLAD(a01, b0, tmp);
+    b0 = arm_nn_read_q15x2_ia(&ip_b0);
+    tmp = __SMLAD(a02, b0, tmp);
+    b0 = arm_nn_read_q15x2_ia(&ip_b0);
+    dummy = read_and_pad_reordered(filter, &a01, &a02);
+    tmp =  __SMLAD(a01, b0, tmp);
+    b0 = arm_nn_read_q15x2_ia(&ip_b0);
+    tmp = __SMLAD(a02, b0, tmp);
+    b0 = arm_nn_read_q15x2_ia(&ip_b0);
+    dummy = read_and_pad_reordered(filter, &a01, &a02);
+    tmp =  __SMLAD(a01, b0, tmp);
+    b0 = arm_nn_read_q15x2_ia(&ip_b0);
+    tmp = __SMLAD(a02, b0, tmp);
+    b0 = arm_nn_read_q15x2_ia(&ip_b0);
+    dummy = read_and_pad_reordered(filter, &a01, &a02);
+    tmp =  __SMLAD(a01, b0, tmp);
+    b0 = arm_nn_read_q15x2_ia(&ip_b0);
+    tmp = __SMLAD(a02, b0, tmp);
+    filter -= 16;
+    *sum_1 += tmp;
+
+    tmp = 0;
+    b0 = arm_nn_read_q15x2_ia(&ip_b0);
+    dummy = read_and_pad_reordered(filter, &a01, &a02);
+    tmp =  __SMLAD(a01, b0, tmp);
+    b0 = arm_nn_read_q15x2_ia(&ip_b0);
+    tmp = __SMLAD(a02, b0, tmp);
+    b0 = arm_nn_read_q15x2_ia(&ip_b0);
+    dummy = read_and_pad_reordered(filter, &a01, &a02);
+    tmp =  __SMLAD(a01, b0, tmp);
+    b0 = arm_nn_read_q15x2_ia(&ip_b0);
+    tmp = __SMLAD(a02, b0, tmp);
+    b0 = arm_nn_read_q15x2_ia(&ip_b0);
+    dummy = read_and_pad_reordered(filter, &a01, &a02);
+    tmp =  __SMLAD(a01, b0, tmp);
+    b0 = arm_nn_read_q15x2_ia(&ip_b0);
+    tmp = __SMLAD(a02, b0, tmp);
+    b0 = arm_nn_read_q15x2_ia(&ip_b0);
+    dummy = read_and_pad_reordered(filter, &a01, &a02);
+    tmp =  __SMLAD(a01, b0, tmp);
+    b0 = arm_nn_read_q15x2_ia(&ip_b0);
+    tmp = __SMLAD(a02, b0, tmp);
+    filter -= 16;
+    *sum_2 += tmp;
+
+    tmp = 0;
+    b0 = arm_nn_read_q15x2_ia(&ip_b0);
+    dummy = read_and_pad_reordered(filter, &a01, &a02);
+    tmp =  __SMLAD(a01, b0, tmp);
+    b0 = arm_nn_read_q15x2_ia(&ip_b0);
+    tmp = __SMLAD(a02, b0, tmp);
+    b0 = arm_nn_read_q15x2_ia(&ip_b0);
+    dummy = read_and_pad_reordered(filter, &a01, &a02);
+    tmp =  __SMLAD(a01, b0, tmp);
+    b0 = arm_nn_read_q15x2_ia(&ip_b0);
+    tmp = __SMLAD(a02, b0, tmp);
+    b0 = arm_nn_read_q15x2_ia(&ip_b0);
+    dummy = read_and_pad_reordered(filter, &a01, &a02);
+    tmp =  __SMLAD(a01, b0, tmp);
+    b0 = arm_nn_read_q15x2_ia(&ip_b0);
+    tmp = __SMLAD(a02, b0, tmp);
+    b0 = arm_nn_read_q15x2_ia(&ip_b0);
+    dummy = read_and_pad_reordered(filter, &a01, &a02);
+    tmp =  __SMLAD(a01, b0, tmp);
+    b0 = arm_nn_read_q15x2_ia(&ip_b0);
+    tmp = __SMLAD(a02, b0, tmp);
+    filter -= 16;
+    *sum_3 += tmp;
+}
 // a better version
 
 
