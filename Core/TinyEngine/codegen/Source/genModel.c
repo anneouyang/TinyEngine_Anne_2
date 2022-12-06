@@ -60,6 +60,7 @@ for(int i = 0; i < 576; i++) {
 	v14_conv_0_weight_QAS[i] = 1.0;
 }
 group_conv_kernel4_stride1_pad0_in4x4_out1x1_uniweight_4row16col_int8input_int8weight_inplace_revised((float*)&input_random[0],4,4,24,weight_fp48,NULL,v14_conv_0_weight,1,1,13824,-FLT_MAX,FLT_MAX,(float*)sbuf, &buffer0[38816], 1, 24, v14_conv_0_weight_QAS, lr);
+// group_conv_kernel4_stride1_pad0_in4x4_out1x1_uniweight_4row8col_int8input_int8weight_inplace_revised((float*)&input_random[0],4,4,24,weight_fp48,NULL,v14_conv_0_weight,1,1,13824,-FLT_MAX,FLT_MAX,(float*)sbuf, &buffer0[38816], 1, 24, v14_conv_0_weight_QAS, lr);
 
 /* layer 141:GROUP_CONV */
 // float v11_conv_0_weight_QAS[240] = {};
